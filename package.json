@@ -1,0 +1,56 @@
+{
+  "name": "x10-typescript-trading-starknet",
+  "version": "0.0.1",
+  "description": "Unofficial TypeScript SDK for Extended Exchange - A perpetual DEX built by ex-Revolut team",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "npm run build:signer && npm run build:ts",
+    "build:ts": "tsc",
+    "build:signer": "node scripts/build-signer.js",
+    "build:signer:custom": "cd wasm-signer && wasm-pack build --target nodejs --out-dir ../wasm && wasm-pack build --target bundler --out-dir ../wasm-web-temp && node -e \"const fs=require('fs');['stark_crypto_wasm.js','stark_crypto_wasm_bg.wasm','stark_crypto_wasm.d.ts'].forEach(f=>{const src=`../wasm-web-temp/${f}`;const dest=`../wasm/${f.replace('.js','-web.js').replace('.wasm','-web.wasm').replace('.d.ts','-web.d.ts')}`;if(fs.existsSync(src))fs.copyFileSync(src,dest);});fs.rmSync('../wasm-web-temp',{recursive:true,force:true});\"",
+    "clean": "rm -rf dist wasm wasm-signer/pkg wasm-signer/pkg-web wasm-signer/target",
+    "prepublishOnly": "npm run build",
+    "test": "npm run build && jest",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\""
+  },
+  "keywords": [
+    "x10",
+    "starknet",
+    "trading",
+    "sdk",
+    "typescript"
+  ],
+  "author": "X10 <tech@ex10.org>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/x10xchange/typescript_sdk"
+  },
+  "dependencies": {
+    "decimal.js": "^10.4.3",
+    "dotenv": "^16.3.1",
+    "ethers": "^6.9.0",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^20.11.0",
+    "@types/ws": "^8.5.10",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.2.4",
+    "ts-jest": "^29.4.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "files": [
+    "dist",
+    "wasm",
+    "README.md",
+    "LICENSE"
+  ]
+}

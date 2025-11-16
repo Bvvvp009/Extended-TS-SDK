@@ -1,0 +1,40 @@
+[package]
+name = "stark-crypto-wasm"
+version = "0.3.8"
+edition = "2021"
+description = "WebAssembly bindings for X10 StarkNet cryptographic operations"
+authors = ["X10 <tech@ex10.org>"]
+license = "MIT"
+repository = "https://github.com/x10xchange/typescript_sdk"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wasm-bindgen = "0.2"
+serde = { version = "1.0", features = ["derive"] }
+serde-wasm-bindgen = "0.6"
+num-bigint = "0.4"
+num-traits = "0.2"
+hex = "0.4"
+sha2 = "0.10"
+
+# Note: We reimplement the exact algorithms from rust-crypto-lib-base
+# using WASM-compatible types (starknet_crypto::FieldElement instead of starknet::core::types::Felt)
+# rust-crypto-lib-base uses ecdsa_sign from starknet crate which is not WASM-compatible
+# We use starknet_crypto::sign which uses standard ECDSA (produces different s values)
+
+[dependencies.starknet-crypto]
+version = "0.5"
+
+[dependencies.tiny-keccak]
+version = "2"
+default-features = false
+features = ["keccak"]
+[dev-dependencies]
+wasm-bindgen-test = "0.3"
+
+[profile.release]
+opt-level = "z"
+lto = true
+
