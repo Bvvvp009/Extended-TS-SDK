@@ -6,17 +6,23 @@ import Decimal from 'decimal.js';
 import { X10BaseModel } from '../utils/model';
 import { isHexString } from '../utils/string';
 import { sign as wasmSign } from './crypto/signer';
+import { CustomStarkSigner, isCustomStarkSigner } from './custom-signer';
 
 /**
  * Stark Perpetual Account
  * Manages signing operations for trading
+ * 
+ * Supports two modes of operation:
+ * 1. Direct signing with a private key (default)
+ * 2. Custom signer integration (e.g., Privy, Web3Auth)
  */
 export class StarkPerpetualAccount {
   private vault: number;
-  private privateKey: bigint;
+  private privateKey?: bigint;
   private publicKey: bigint;
   private apiKey: string;
   private tradingFee: Map<string, any> = new Map();
+  private customSigner?: CustomStarkSigner;
 
   constructor(vault: number | string, privateKey: string, publicKey: string, apiKey: string) {
     if (!isHexString(privateKey)) {
@@ -66,12 +72,91 @@ export class StarkPerpetualAccount {
   }
 
   /**
+   * Set a custom signer for remote signing (e.g., Privy, Web3Auth)
+   * 
+   * @param signer - Custom signer implementation
+   * 
+   * @example
+   * ```typescript
+   * const account = new StarkPerpetualAccount(vault, privateKey, publicKey, apiKey);
+   * account.setCustomSigner(new PrivyStarkSigner(privyClient, walletId));
+   * ```
+   */
+  setCustomSigner(signer: CustomStarkSigner): void {
+    if (!isCustomStarkSigner(signer)) {
+      throw new Error('Invalid custom signer: must implement CustomStarkSigner interface');
+    }
+    this.customSigner = signer;
+  }
+
+  /**
+   * Get the custom signer if set
+   */
+  getCustomSigner(): CustomStarkSigner | undefined {
+    return this.customSigner;
+  }
+
+  /**
+   * Clear the custom signer and use direct signing
+   */
+  clearCustomSigner(): void {
+    this.customSigner = undefined;
+  }
+
+  /**
    * Sign a message hash
    * Returns [r, s] tuple
+   * 
+   * If a custom signer is set, uses the custom signer.
+   * Otherwise, uses the built-in WASM signer with the private key.
    */
-  sign(msgHash: bigint): [bigint, bigint] {
+  sign(msgHash: bigint): [bigint, bigint] | Promise<[bigint, bigint]> {
+    if (this.customSigner) {
+      return this.customSigner.sign(msgHash);
+    }
+    
+    if (!this.privateKey) {
+      throw new Error('No private key or custom signer available for signing');
+    }
+    
     return wasmSign(this.privateKey, msgHash);
   }
+}
+
+/**
+ * Create a StarkPerpetualAccount with a custom signer
+ * 
+ * Use this factory function when integrating with external signing services
+ * like Privy, Web3Auth, or other remote signers that don't expose private keys.
+ * 
+ * @param vault - Vault ID
+ * @param publicKey - Public key as hex string
+ * @param apiKey - API key for authentication
+ * @param customSigner - Custom signer implementation
+ * @returns StarkPerpetualAccount configured with the custom signer
+ * 
+ * @example
+ * ```typescript
+ * const privySigner = new PrivyStarkSigner(privyClient, walletId);
+ * const account = createStarkPerpetualAccountWithCustomSigner(
+ *   vaultId,
+ *   publicKeyHex,
+ *   apiKey,
+ *   privySigner
+ * );
+ * ```
+ */
+export function createStarkPerpetualAccountWithCustomSigner(
+  vault: number | string,
+  publicKey: string,
+  apiKey: string,
+  customSigner: CustomStarkSigner
+): StarkPerpetualAccount {
+  // Use a dummy private key (all zeros) since it won't be used
+  const dummyPrivateKey = '0x0000000000000000000000000000000000000000000000000000000000000000';
+  const account = new StarkPerpetualAccount(vault, dummyPrivateKey, publicKey, apiKey);
+  account.setCustomSigner(customSigner);
+  return account;
 }
 
 /**

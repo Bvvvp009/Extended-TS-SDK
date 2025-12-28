@@ -16,7 +16,20 @@ export { initWasm } from './perpetual/crypto/signer';
 export { EndpointConfig, StarknetDomain, TESTNET_CONFIG, MAINNET_CONFIG } from './perpetual/configuration';
 
 // Accounts
-export { StarkPerpetualAccount, AccountModel, AccountLeverage, BalanceModel } from './perpetual/accounts';
+export { 
+  StarkPerpetualAccount, 
+  AccountModel, 
+  AccountLeverage, 
+  BalanceModel,
+  createStarkPerpetualAccountWithCustomSigner
+} from './perpetual/accounts';
+
+// Custom Signer Support
+export { 
+  CustomStarkSigner, 
+  SignatureResult, 
+  isCustomStarkSigner 
+} from './perpetual/custom-signer';
 
 // Orders
 export {

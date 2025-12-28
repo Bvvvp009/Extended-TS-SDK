@@ -155,6 +155,45 @@ const [r, s] = sign(privateKey, msgHash);
 
 The signer automatically detects your environment (Node.js or browser) and loads the appropriate WASM module.
 
+### Custom Signer Support (Privy, Web3Auth, etc.)
+
+The SDK supports **custom signers** for integration with remote signing services like Privy, Web3Auth, or hardware wallets:
+
+```typescript
+import { 
+  CustomStarkSigner, 
+  createStarkPerpetualAccountWithCustomSigner 
+} from 'extended-typescript-sdk';
+
+// Implement the CustomStarkSigner interface
+class PrivyStarkSigner implements CustomStarkSigner {
+  constructor(private privyClient: any, private walletId: string) {}
+  
+  async sign(msgHash: bigint): Promise<[bigint, bigint]> {
+    const msgHashHex = '0x' + msgHash.toString(16);
+    const signature = await this.privyClient.signStarknetMessage(
+      this.walletId,
+      msgHashHex
+    );
+    return [BigInt(signature.r), BigInt(signature.s)];
+  }
+}
+
+// Create account with custom signer
+const privySigner = new PrivyStarkSigner(privyClient, walletId);
+const account = createStarkPerpetualAccountWithCustomSigner(
+  vaultId,
+  publicKeyHex,
+  apiKey,
+  privySigner
+);
+
+// Use normally - signing will be handled by Privy
+const client = new PerpetualTradingClient(TESTNET_CONFIG, account);
+```
+
+See [examples/16_privy_integration.ts](./examples/16_privy_integration.ts) for a complete example.
+
 ### Building Your Own WASM Signer
 
 If you want to build your own WASM signer (requires Rust and wasm-pack):
@@ -399,6 +438,26 @@ For issues and questions:
 - Extended Exchange: https://extended.exchange/
 
 **Note**: This is an unofficial, community-maintained SDK. For official support, please contact Extended Exchange directly.
+
+## Environment Support
+
+The SDK works in multiple environments including:
+
+- ✅ **Node.js** (v18+)
+- ✅ **Browser** (Chrome, Firefox, Safari, Edge)
+- ✅ **Progressive Web Apps (PWA)**
+- ✅ **React Native** (with polyfills)
+- ✅ **Electron**
+- ⚠️ **Native Mobile** (iOS/Android) - Requires additional setup
+
+For detailed information about using the SDK in different environments, including PWA, React Native, and mobile apps, see [ENVIRONMENT_SUPPORT.md](./ENVIRONMENT_SUPPORT.md).
+
+### Quick Links
+
+- **PWA Support**: See [ENVIRONMENT_SUPPORT.md](./ENVIRONMENT_SUPPORT.md#progressive-web-apps-pwa)
+- **React Native**: See [ENVIRONMENT_SUPPORT.md](./ENVIRONMENT_SUPPORT.md#react-native)
+- **Mobile Apps**: See [ENVIRONMENT_SUPPORT.md](./ENVIRONMENT_SUPPORT.md#native-mobile-iosandroid)
+- **Deposits & Tokens**: See [ENVIRONMENT_SUPPORT.md](./ENVIRONMENT_SUPPORT.md#deposits-and-supported-tokens)
 
 ## API Coverage
 
