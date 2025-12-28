@@ -44,7 +44,7 @@ export class SettlementDataCtx {
   nonce: number;
   collateralPositionId: number;
   expireTime: Date;
-  signer: (msgHash: bigint) => [bigint, bigint];
+  signer: (msgHash: bigint) => Promise<[bigint, bigint]>;
   publicKey: bigint;
   starknetDomain: StarknetDomain;
 
@@ -54,7 +54,7 @@ export class SettlementDataCtx {
     nonce: number,
     collateralPositionId: number,
     expireTime: Date,
-    signer: (msgHash: bigint) => [bigint, bigint],
+    signer: (msgHash: bigint) => Promise<[bigint, bigint]>,
     publicKey: bigint,
     starknetDomain: StarknetDomain,
     builderFee?: Decimal
@@ -125,12 +125,12 @@ export function hashOrder(
 /**
  * Create order settlement data
  */
-export function createOrderSettlementData(
+export async function createOrderSettlementData(
   side: OrderSide,
   syntheticAmount: Decimal,
   price: Decimal,
   ctx: SettlementDataCtx
-): OrderSettlementData {
+): Promise<OrderSettlementData> {
   const isBuyingSynthetic = side === OrderSide.BUY;
   const roundingContext = isBuyingSynthetic ? ROUNDING_BUY_CONTEXT : ROUNDING_SELL_CONTEXT;
 
@@ -173,7 +173,7 @@ export function createOrderSettlementData(
     ctx.starknetDomain
   );
 
-  const [orderSignatureR, orderSignatureS] = ctx.signer(orderHash);
+  const [orderSignatureR, orderSignatureS] = await ctx.signer(orderHash);
 
   const settlement = new StarkSettlementModel(
     new SettlementSignatureModel('0x' + orderSignatureR.toString(16), '0x' + orderSignatureS.toString(16)),

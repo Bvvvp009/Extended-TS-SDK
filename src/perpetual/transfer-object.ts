@@ -23,7 +23,7 @@ function calcExpirationTimestamp(): number {
 /**
  * Create transfer object
  */
-export function createTransferObject(
+export async function createTransferObject(
   fromVault: number,
   toVault: number,
   toL2Key: number | string,
@@ -31,7 +31,7 @@ export function createTransferObject(
   config: EndpointConfig,
   starkAccount: StarkPerpetualAccount,
   nonce?: number
-): OnChainPerpetualTransferModel {
+): Promise<OnChainPerpetualTransferModel> {
   const expirationTimestamp = calcExpirationTimestamp();
   
   // Scale amount by decimals
@@ -63,7 +63,7 @@ export function createTransferObject(
     collateralId: config.collateralAssetOnChainId,
   });
 
-  const [transferSignatureR, transferSignatureS] = starkAccount.sign(transferHash);
+  const [transferSignatureR, transferSignatureS] = await starkAccount.sign(transferHash);
   
   const settlement = new StarkTransferSettlement(
     starkAmount,

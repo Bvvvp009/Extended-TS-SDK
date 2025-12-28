@@ -23,7 +23,7 @@ function calcExpirationTimestamp(): number {
 /**
  * Create withdrawal object
  */
-export function createWithdrawalObject(
+export async function createWithdrawalObject(
   amount: Decimal,
   recipientStarkAddress: string,
   starkAccount: StarkPerpetualAccount,
@@ -33,7 +33,7 @@ export function createWithdrawalObject(
   description?: string,
   nonce?: number,
   quoteId?: string
-): WithdrawalRequest {
+): Promise<WithdrawalRequest> {
   const expirationTimestamp = calcExpirationTimestamp();
   
   // Scale amount by decimals
@@ -59,7 +59,7 @@ export function createWithdrawalObject(
     collateralId: config.collateralAssetOnChainId,
   });
 
-  const [transferSignatureR, transferSignatureS] = starkAccount.sign(withdrawalHash);
+  const [transferSignatureR, transferSignatureS] = await starkAccount.sign(withdrawalHash);
 
   const settlement = new StarkWithdrawalSettlement(
     recipientStarkAddress.startsWith('0x') ? recipientStarkAddress : `0x${recipientStarkAddress}`, // Hex string

@@ -76,7 +76,7 @@ function createOrderTpslTriggerModel(
 /**
  * Create an order object to be placed on the exchange
  */
-export function createOrderObject(
+export async function createOrderObject(
   account: StarkPerpetualAccount,
   market: MarketModel,
   amountOfSynthetic: Decimal,
@@ -99,7 +99,7 @@ export function createOrderObject(
     takeProfit?: OrderTpslTriggerParam;
     stopLoss?: OrderTpslTriggerParam;
   } = {}
-): NewOrderModel {
+): Promise<NewOrderModel> {
   const {
     orderType = OrderType.LIMIT,
     postOnly = false,
@@ -161,7 +161,7 @@ export function createOrderObject(
     builderFee
   );
 
-  const settlementData = createOrderSettlementData(
+  const settlementData = await createOrderSettlementData(
     side,
     amountOfSynthetic,
     price,
@@ -170,7 +170,7 @@ export function createOrderObject(
 
   let tpTriggerModel: CreateOrderTpslTriggerModel | undefined;
   if (takeProfit) {
-    const tpSettlementData = createOrderSettlementData(
+    const tpSettlementData = await createOrderSettlementData(
       getOppositeSide(side),
       amountOfSynthetic,
       takeProfit.price,
@@ -181,7 +181,7 @@ export function createOrderObject(
 
   let slTriggerModel: CreateOrderTpslTriggerModel | undefined;
   if (stopLoss) {
-    const slSettlementData = createOrderSettlementData(
+    const slSettlementData = await createOrderSettlementData(
       getOppositeSide(side),
       amountOfSynthetic,
       stopLoss.price,
