@@ -105,12 +105,14 @@ export class StarkPerpetualAccount {
 
   /**
    * Sign a message hash
-   * Returns [r, s] tuple
+   * Returns Promise resolving to [r, s] tuple
    * 
    * If a custom signer is set, uses the custom signer.
    * Otherwise, uses the built-in WASM signer with the private key.
+   * 
+   * @returns Promise resolving to signature tuple [r, s]
    */
-  sign(msgHash: bigint): [bigint, bigint] | Promise<[bigint, bigint]> {
+  async sign(msgHash: bigint): Promise<[bigint, bigint]> {
     if (this.customSigner) {
       return this.customSigner.sign(msgHash);
     }
@@ -119,7 +121,8 @@ export class StarkPerpetualAccount {
       throw new Error('No private key or custom signer available for signing');
     }
     
-    return wasmSign(this.privateKey, msgHash);
+    // Wrap synchronous WASM sign in Promise for consistent API
+    return Promise.resolve(wasmSign(this.privateKey, msgHash));
   }
 }
 
@@ -128,6 +131,10 @@ export class StarkPerpetualAccount {
  * 
  * Use this factory function when integrating with external signing services
  * like Privy, Web3Auth, or other remote signers that don't expose private keys.
+ * 
+ * Note: This function uses a dummy private key internally to maintain backward
+ * compatibility with the existing StarkPerpetualAccount constructor. The dummy
+ * key is never used for signing when a custom signer is set.
  * 
  * @param vault - Vault ID
  * @param publicKey - Public key as hex string
@@ -152,7 +159,9 @@ export function createStarkPerpetualAccountWithCustomSigner(
   apiKey: string,
   customSigner: CustomStarkSigner
 ): StarkPerpetualAccount {
-  // Use a dummy private key (all zeros) since it won't be used
+  // Use a dummy private key (all zeros) to satisfy the constructor
+  // This maintains backward compatibility without breaking existing code
+  // The dummy key is never used when a custom signer is set
   const dummyPrivateKey = '0x0000000000000000000000000000000000000000000000000000000000000000';
   const account = new StarkPerpetualAccount(vault, dummyPrivateKey, publicKey, apiKey);
   account.setCustomSigner(customSigner);
