@@ -40,6 +40,33 @@ try {
       console.log(`  ✓ Copied ${file}`);
     }
   });
+  
+  // Patch the Node.js WASM file to fix circular imports issue
+  // The nodejs target generates code with imports['__wbindgen_placeholder__'] = module.exports
+  // which tries to import "./stark_crypto_wasm_bg.js" before exports are populated
+  // We fix this by creating Proxy objects that forward to exports dynamically
+  const wasmJsPath = path.join(wasmOutputDir, 'stark_crypto_wasm.js');
+  let wasmJsContent = fs.readFileSync(wasmJsPath, 'utf8');
+  
+  wasmJsContent = wasmJsContent.replace(
+    /let imports = \{\};\nimports\['__wbindgen_placeholder__'\] = module\.exports;/,
+    `let imports = {};
+// Create a proxy object that will forward to exports once they're defined
+imports['__wbindgen_placeholder__'] = new Proxy({}, {
+  get: (target, prop) => {
+    return exports[prop];
+  }
+});
+// Also handle the "./stark_crypto_wasm_bg.js" import that wasm-bindgen expects
+imports['./stark_crypto_wasm_bg.js'] = new Proxy({}, {
+  get: (target, prop) => {
+    return exports[prop];
+  }
+});`
+  );
+  
+  fs.writeFileSync(wasmJsPath, wasmJsContent);
+  console.log(`  ✓ Patched ${path.basename(wasmJsPath)} to fix circular imports`);
 } catch (error) {
   console.error('❌ Failed to build Node.js target:', error.message);
   process.exit(1);

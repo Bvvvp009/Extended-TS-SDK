@@ -1,6 +1,17 @@
 
 let imports = {};
-imports['__wbindgen_placeholder__'] = module.exports;
+// Create a proxy object that will forward to exports once they're defined
+imports['__wbindgen_placeholder__'] = new Proxy({}, {
+  get: (target, prop) => {
+    return exports[prop];
+  }
+});
+// Also handle the "./stark_crypto_wasm_bg.js" import that wasm-bindgen expects
+imports['./stark_crypto_wasm_bg.js'] = new Proxy({}, {
+  get: (target, prop) => {
+    return exports[prop];
+  }
+});
 
 let cachedUint8ArrayMemory0 = null;
 
