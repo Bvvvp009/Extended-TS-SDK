@@ -129,7 +129,51 @@ for await (const update of orderbookStream) {
   console.log('Orderbook update:', update);
 }
 
-// Subscribe to account updates
+// Subscribe to public trades
+const tradesStream = streamClient.subscribeToPublicTrades('BTC-USD');
+await tradesStream.connect();
+
+for await (const trade of tradesStream) {
+  console.log('Trade:', trade);
+}
+
+// Subscribe to funding rates
+const fundingStream = streamClient.subscribeToFundingRates('BTC-USD');
+await fundingStream.connect();
+
+for await (const fundingUpdate of fundingStream) {
+  console.log('Funding rate:', fundingUpdate);
+}
+
+// Subscribe to candles (OHLCV data)
+const candlesStream = streamClient.subscribeToCandles({
+  marketName: 'BTC-USD',
+  candleType: 'trades', // 'trades', 'mark-prices', or 'index-prices'
+  interval: 'PT1M', // ISO 8601 duration (PT1M, PT5M, PT15M, PT1H, etc.)
+});
+await candlesStream.connect();
+
+for await (const candle of candlesStream) {
+  console.log('Candle:', candle);
+}
+
+// Subscribe to mark price updates
+const markPriceStream = streamClient.subscribeToMarkPrice('BTC-USD');
+await markPriceStream.connect();
+
+for await (const priceUpdate of markPriceStream) {
+  console.log('Mark price:', priceUpdate);
+}
+
+// Subscribe to index price updates
+const indexPriceStream = streamClient.subscribeToIndexPrice('BTC-USD');
+await indexPriceStream.connect();
+
+for await (const priceUpdate of indexPriceStream) {
+  console.log('Index price:', priceUpdate);
+}
+
+// Subscribe to account updates (requires API key)
 const accountStream = streamClient.subscribeToAccountUpdates(apiKey);
 await accountStream.connect();
 

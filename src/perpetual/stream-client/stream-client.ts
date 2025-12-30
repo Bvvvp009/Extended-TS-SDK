@@ -85,6 +85,38 @@ export class PerpetualStreamClient {
   }
 
   /**
+   * Subscribe to mark price stream
+   * https://api.docs.extended.exchange/#mark-price-stream
+   * 
+   * @param marketName - Optional market name. If not specified, subscribes to all markets
+   * @returns PerpetualStreamConnection for mark price updates
+   */
+  subscribeToMarkPrice(marketName?: string): PerpetualStreamConnection<any> {
+    const path = marketName ? '/prices/mark/<market>' : '/prices/mark';
+    const url = getUrl(`${this.apiUrl}${path}`, {
+      pathParams: marketName ? { market: marketName } : undefined,
+    });
+
+    return new PerpetualStreamConnection(url);
+  }
+
+  /**
+   * Subscribe to index price stream
+   * https://api.docs.extended.exchange/#index-price-stream
+   * 
+   * @param marketName - Optional market name. If not specified, subscribes to all markets
+   * @returns PerpetualStreamConnection for index price updates
+   */
+  subscribeToIndexPrice(marketName?: string): PerpetualStreamConnection<any> {
+    const path = marketName ? '/prices/index/<market>' : '/prices/index';
+    const url = getUrl(`${this.apiUrl}${path}`, {
+      pathParams: marketName ? { market: marketName } : undefined,
+    });
+
+    return new PerpetualStreamConnection(url);
+  }
+
+  /**
    * Subscribe to account updates stream
    * https://api.docs.extended.exchange/#account-updates-stream
    */

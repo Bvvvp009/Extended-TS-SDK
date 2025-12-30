@@ -115,7 +115,7 @@ export class PerpetualTradingClient {
       }
     );
 
-    return await this.orderManagementModule.placeOrder(order);
+    return await this.orderManagementModule.placeOrder(await order);
   }
 
   /**

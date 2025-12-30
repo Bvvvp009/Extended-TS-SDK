@@ -306,7 +306,7 @@ export class AccountModule extends BaseModule {
     const toL2KeyNum =
       typeof options.toL2Key === 'string' ? parseInt(options.toL2Key, 16) : options.toL2Key;
 
-    const requestModel = createTransferObject(
+    const requestModel = await createTransferObject(
       fromVault,
       options.toVault,
       toL2KeyNum,
@@ -377,7 +377,7 @@ export class AccountModule extends BaseModule {
       throw new Error('Recipient stark address not found');
     }
 
-    const requestModel = createWithdrawalObject(
+    const requestModel = await createWithdrawalObject(
       options.amount,
       recipientStarkAddress,
       this.getStarkAccount(),
