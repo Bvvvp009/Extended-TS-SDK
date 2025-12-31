@@ -65,7 +65,7 @@ async function main() {
       // Check if we have funds available for withdrawal
       const availableForWithdrawal = new Decimal(balanceBefore.data.availableForWithdrawal);
       if (availableForWithdrawal.lte(0)) {
-        console.log('\n No funds available for withdrawal.');
+        console.log('\nNo funds available for withdrawal.');
         console.log('You must close all positions and have no open orders to withdraw funds.');
         return;
       }

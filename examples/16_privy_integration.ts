@@ -26,7 +26,6 @@ import {
   createStarkPerpetualAccountWithCustomSigner,
   OrderSide,
 } from '../src/index';
-import Decimal from 'decimal.js';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -142,7 +141,7 @@ async function main() {
     //
     // Your private key never leaves Privy's secure environment!
     
-    console.log('\n✅ Successfully authenticated with Privy and connected to Extended Exchange');
+    console.log('\nSuccessfully authenticated with Privy and connected to Extended Exchange');
     console.log('Account balance retrieved:');
     console.log(`  Balance: ${balance.data?.balance} USD`);
     console.log(`  Equity: ${balance.data?.equity} USD`);
