@@ -3,6 +3,10 @@ node_modules/
 
 # Build outputs
 dist/
+dist-examples/
+examples/*.js
+examples/*.d.ts
+examples/*.js.map
 *.tsbuildinfo
 *.map
 

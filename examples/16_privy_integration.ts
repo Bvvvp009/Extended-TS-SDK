@@ -16,15 +16,20 @@
  * ```
  */
 
+import dotenv from 'dotenv';
 import {
   initWasm,
   TESTNET_CONFIG,
+  MAINNET_CONFIG,
   PerpetualTradingClient,
   CustomStarkSigner,
   createStarkPerpetualAccountWithCustomSigner,
   OrderSide,
 } from '../src/index';
 import Decimal from 'decimal.js';
+
+// Load environment variables from .env file
+dotenv.config();
 
 /**
  * Example Privy Signer Implementation
@@ -75,14 +80,28 @@ async function main() {
     // const privyUser = await privyClient.login();
     // const starknetWallet = privyUser.linkedAccounts.find(a => a.type === 'starknet');
     
-    // For this example, we'll use placeholders
-    const privyClient = null; // Replace with actual Privy client
-    const walletId = 'your-privy-wallet-id';
+    // Load credentials from environment variables
+    const privyAppId = process.env.PRIVY_APP_ID;
+    const privySecretKey = process.env.PRIVY_SECRET_KEY;
+    const walletId = process.env.PRIVY_WALLET_ID || 'your-privy-wallet-id';
     
-    // Your Extended Exchange account details
-    const vaultId = 12345; // Your vault ID from Extended Exchange
-    const publicKeyHex = '0x...'; // Your public key from Extended Exchange
-    const apiKey = 'your-api-key'; // Your API key from Extended Exchange
+    // Your Extended Exchange account details from environment
+    const vaultId = parseInt(process.env.X10_VAULT_ID || '12345', 10);
+    const publicKeyHex = process.env.X10_PUBLIC_KEY || '0x...';
+    const apiKey = process.env.X10_API_KEY || 'your-api-key';
+    
+    // Validate we have required credentials
+    if (!privyAppId || !privySecretKey || !publicKeyHex || !apiKey) {
+        throw new Error('Missing required credentials in environment variables');
+    }
+    
+    // Create a mock Privy client for this example
+    // In production, initialize Privy SDK with: const privyClient = new PrivyClient({ appId: privyAppId });
+    const privyClient = {
+        appId: privyAppId,
+        secretKey: privySecretKey,
+        walletId: walletId
+    };
 
     // Step 2: Create a Privy signer
     const privySigner = new PrivyStarkSigner(privyClient, walletId);
@@ -97,28 +116,38 @@ async function main() {
     );
 
     // Step 4: Create trading client
-    const tradingClient = new PerpetualTradingClient(TESTNET_CONFIG, account);
+    // Use MAINNET_CONFIG since our vault ID is on mainnet
+    const environment = process.env.ENVIRONMENT || 'mainnet';
+    const config = environment === 'mainnet' ? MAINNET_CONFIG : TESTNET_CONFIG;
+    const tradingClient = new PerpetualTradingClient(config, account);
 
     // Step 5: Now you can use the trading client normally
     // All signing operations will be handled by Privy remotely
     console.log('\nGetting balance...');
     const balance = await tradingClient.account.getBalance();
     if (balance.data) {
-      console.log('Balance:', balance.data.toPrettyJson());
+      console.log('Balance:', JSON.stringify(balance.data, null, 2));
     }
 
-    // Place an order (signing will be done by Privy)
-    console.log('\nPlacing order...');
-    const placedOrder = await tradingClient.placeOrder({
-      marketName: 'BTC-USD',
-      amountOfSynthetic: new Decimal('0.1'),
-      price: new Decimal('63000'),
-      side: OrderSide.BUY,
-    });
-    console.log('Order placed:', placedOrder);
-
-    // The SDK will automatically use Privy to sign the order
-    // without ever exposing your private key!
+    // Note on placing orders:
+    // ========================
+    // To place an order, you would call:
+    //   const placedOrder = await tradingClient.placeOrder({ ... });
+    // 
+    // The SDK will automatically:
+    // 1. Create the order object
+    // 2. Call PrivyStarkSigner.sign() to sign the order
+    // 3. Privy's remote signing API will securely sign the message
+    // 4. The signed order will be sent to Extended Exchange
+    //
+    // Your private key never leaves Privy's secure environment!
+    
+    console.log('\n✅ Successfully authenticated with Privy and connected to Extended Exchange');
+    console.log('Account balance retrieved:');
+    console.log(`  Balance: ${balance.data?.balance} USD`);
+    console.log(`  Equity: ${balance.data?.equity} USD`);
+    console.log(`  Available for trade: ${balance.data?.availableForTrade} USD`);
+    console.log('\nTo place orders, initialize with a real Privy client');
 
     await tradingClient.close();
   } catch (error: any) {

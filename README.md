@@ -485,23 +485,14 @@ For issues and questions:
 
 ## Environment Support
 
-The SDK works in multiple environments including:
+- ✅ Node.js (v18+)
+- ✅ Browsers (Chrome/Firefox/Safari/Edge)
+- ✅ PWAs
+- ✅ React Native (with polyfills or custom signer)
+- ✅ Electron
+- ⚠️ Native iOS/Android (via React Native or WebView)
 
-- ✅ **Node.js** (v18+)
-- ✅ **Browser** (Chrome, Firefox, Safari, Edge)
-- ✅ **Progressive Web Apps (PWA)**
-- ✅ **React Native** (with polyfills)
-- ✅ **Electron**
-- ⚠️ **Native Mobile** (iOS/Android) - Requires additional setup
-
-For detailed information about using the SDK in different environments, including PWA, React Native, and mobile apps, see [ENVIRONMENT_SUPPORT.md](./ENVIRONMENT_SUPPORT.md).
-
-### Quick Links
-
-- **PWA Support**: See [ENVIRONMENT_SUPPORT.md](./ENVIRONMENT_SUPPORT.md#progressive-web-apps-pwa)
-- **React Native**: See [ENVIRONMENT_SUPPORT.md](./ENVIRONMENT_SUPPORT.md#react-native)
-- **Mobile Apps**: See [ENVIRONMENT_SUPPORT.md](./ENVIRONMENT_SUPPORT.md#native-mobile-iosandroid)
-- **Deposits & Tokens**: See [ENVIRONMENT_SUPPORT.md](./ENVIRONMENT_SUPPORT.md#deposits-and-supported-tokens)
+Details and setup notes: see [ENVIRONMENT_SUPPORT.md](ENVIRONMENT_SUPPORT.md).
 
 ## API Coverage
 
