@@ -350,7 +350,11 @@ export class AccountModule extends BaseModule {
     let recipientStarkAddress: string | undefined = options.starkAddress;
 
     if (!recipientStarkAddress) {
-      if (chainId === 'STRK') {
+      // First try to use account's bridgeStarknetAddress
+      if (account.bridgeStarknetAddress) {
+        recipientStarkAddress = account.bridgeStarknetAddress;
+      } else if (chainId === 'STRK') {
+        // Fallback to client's starknetWalletAddress for STRK chain
         const clientResponse = await this.getClient();
         const client = clientResponse.data;
         
@@ -366,10 +370,7 @@ export class AccountModule extends BaseModule {
         
         recipientStarkAddress = client.starknetWalletAddress;
       } else {
-        if (!account.bridgeStarknetAddress) {
-          throw new Error('Account bridge_starknet_address not found');
-        }
-        recipientStarkAddress = account.bridgeStarknetAddress;
+        throw new Error('Account bridge_starknet_address not found');
       }
     }
 
@@ -382,7 +383,7 @@ export class AccountModule extends BaseModule {
       recipientStarkAddress,
       this.getStarkAccount(),
       this.getEndpointConfig(),
-      account.id,
+      account.accountId,
       chainId,
       undefined,
       options.nonce,

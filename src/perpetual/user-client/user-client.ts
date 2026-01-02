@@ -200,7 +200,7 @@ export class UserClient {
    */
   async createAccountApiKey(account: AccountModel, description?: string): Promise<string> {
     const requestPath = '/api/v1/user/account/api-key';
-    const finalDescription = description || `trading api key for account ${account.id}`;
+    const finalDescription = description || `trading api key for account ${account.accountId}`;
 
     const wallet = new ethers.Wallet(this.l1PrivateKey());
     const time = utcNow();
@@ -212,7 +212,7 @@ export class UserClient {
     const headers: Record<string, string> = {
       [L1_AUTH_SIGNATURE_HEADER]: l1Signature,
       [L1_MESSAGE_TIME_HEADER]: authTimeString,
-      [ACTIVE_ACCOUNT_HEADER]: account.id.toString(),
+      [ACTIVE_ACCOUNT_HEADER]: account.accountId.toString(),
     };
 
     const url = this.getUrl(this.endpointConfig.onboardingUrl, requestPath);
@@ -248,7 +248,7 @@ export class UserClient {
     const headers: Record<string, string> = {
       [L1_AUTH_SIGNATURE_HEADER]: l1Signature,
       [L1_MESSAGE_TIME_HEADER]: authTimeString,
-      [ACTIVE_ACCOUNT_HEADER]: account.id.toString(),
+      [ACTIVE_ACCOUNT_HEADER]: account.accountId.toString(),
     };
 
     const url = this.getUrl(this.endpointConfig.onboardingUrl, requestPath);
@@ -271,7 +271,7 @@ export class UserClient {
     const headers: Record<string, string> = {
       [L1_AUTH_SIGNATURE_HEADER]: l1Signature,
       [L1_MESSAGE_TIME_HEADER]: authTimeString,
-      [ACTIVE_ACCOUNT_HEADER]: account.id.toString(),
+      [ACTIVE_ACCOUNT_HEADER]: account.accountId.toString(),
     };
 
     const url = this.getUrl(this.endpointConfig.onboardingUrl, requestPath);
@@ -284,5 +284,6 @@ export class UserClient {
     return response.data || [];
   }
 }
+
 
 

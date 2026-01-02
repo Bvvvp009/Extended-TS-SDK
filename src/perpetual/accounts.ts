@@ -172,7 +172,7 @@ export function createStarkPerpetualAccountWithCustomSigner(
  * Account model
  */
 export class AccountModel extends X10BaseModel {
-  id: number;
+  accountId: number;
   description: string;
   accountIndex: number;
   status: string;
@@ -182,7 +182,7 @@ export class AccountModel extends X10BaseModel {
   apiKeys?: string[];
 
   constructor(
-    id: number,
+    accountId: number,
     description: string,
     accountIndex: number,
     status: string,
@@ -192,7 +192,7 @@ export class AccountModel extends X10BaseModel {
     apiKeys?: string[]
   ) {
     super();
-    this.id = id;
+    this.accountId = accountId;
     this.description = description;
     this.accountIndex = accountIndex;
     this.status = status;
