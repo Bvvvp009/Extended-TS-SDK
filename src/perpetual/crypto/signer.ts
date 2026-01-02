@@ -60,10 +60,12 @@ export async function initWasm(): Promise<void> {
       
       // Try shipped wasm/ folder first (included in npm package)
       const possiblePaths = [
-        path.join(__dirname, '../../wasm/stark_crypto_wasm'),
+        path.join(__dirname, '../../../wasm/stark_crypto_wasm'),  // From dist/perpetual/crypto/ to root wasm/
+        path.join(__dirname, '../../wasm/stark_crypto_wasm'),     // Legacy path (if wasm in dist/)
         path.join(process.cwd(), 'wasm/stark_crypto_wasm'),
         path.join(process.cwd(), 'node_modules/extended-typescript-sdk/wasm/stark_crypto_wasm'),
         // Fallback to build directory (for development)
+        path.join(__dirname, '../../../wasm-signer/pkg/stark_crypto_wasm'),
         path.join(__dirname, '../../wasm-signer/pkg/stark_crypto_wasm'),
         path.join(process.cwd(), 'wasm-signer/pkg/stark_crypto_wasm'),
       ];
@@ -98,27 +100,35 @@ export async function initWasm(): Promise<void> {
       // Try to load from wasm/ folder (bundler will handle this)
       try {
         // For browser, we expect the bundler to handle WASM imports
-        // The bundler should resolve wasm/stark_crypto_wasm-web.js
-        // @ts-expect-error - Dynamic import resolved at runtime by bundler
-        wasmModule = await import('../../wasm/stark_crypto_wasm-web') as WasmModule;
+        // @ts-ignore - WASM module path resolved at runtime by bundler
+        wasmModule = await import('../../../wasm/stark_crypto_wasm-web') as WasmModule;
         
         if (wasmModule.init) {
           await wasmModule.init();
         }
       } catch (browserError: any) {
-        // Fallback: try without -web suffix (for custom builds)
+        // Fallback: try legacy path or without -web suffix
         try {
-          // @ts-expect-error - Dynamic import resolved at runtime by bundler
-          wasmModule = await import('../../wasm/stark_crypto_wasm') as WasmModule;
+          // @ts-ignore - WASM module path resolved at runtime by bundler
+          wasmModule = await import('../../wasm/stark_crypto_wasm-web') as WasmModule;
           if (wasmModule.init) {
             await wasmModule.init();
           }
-        } catch (fallbackError: any) {
-          throw new Error(
-            `Failed to load WASM module in browser environment.\n` +
-            `Make sure to build with browser target: npm run build:signer\n` +
-            `Error: ${browserError.message || browserError}`
-          );
+        } catch (legacyError: any) {
+          try {
+            // @ts-ignore - WASM module path resolved at runtime by bundler
+            wasmModule = await import('../../../wasm/stark_crypto_wasm') as WasmModule;
+            if (wasmModule.init) {
+              await wasmModule.init();
+            }
+          } catch (fallbackError: any) {
+            throw new Error(
+              `Failed to load WASM module in browser environment.\n` +
+              `Make sure to build with browser target: npm run build:signer\n` +
+              `Tried: ../../../wasm/stark_crypto_wasm-web, ../../wasm/stark_crypto_wasm-web, ../../../wasm/stark_crypto_wasm\n` +
+              `Error: ${browserError.message || browserError}`
+            );
+          }
         }
       }
     }
