@@ -1,6 +1,6 @@
 {
   "name": "extended-typescript-sdk",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Unofficial TypeScript SDK for Extended Exchange - A perpetual DEX built by ex-Revolut team",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
