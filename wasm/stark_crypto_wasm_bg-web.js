@@ -1,17 +1,7 @@
-
-let imports = {};
-// Create a proxy object that will forward to exports once they're defined
-imports['__wbindgen_placeholder__'] = new Proxy({}, {
-  get: (target, prop) => {
-    return exports[prop];
-  }
-});
-// Also handle the "./stark_crypto_wasm_bg.js" import that wasm-bindgen expects
-imports['./stark_crypto_wasm_bg.js'] = new Proxy({}, {
-  get: (target, prop) => {
-    return exports[prop];
-  }
-});
+let wasm;
+export function __wbg_set_wasm(val) {
+    wasm = val;
+}
 
 function getArrayJsValueFromWasm0(ptr, len) {
     ptr = ptr >>> 0;
@@ -84,7 +74,15 @@ function passStringToWasm0(arg, malloc, realloc) {
 
 let cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
 cachedTextDecoder.decode();
+const MAX_SAFARI_DECODE_BYTES = 2146435072;
+let numBytesDecoded = 0;
 function decodeText(ptr, len) {
+    numBytesDecoded += len;
+    if (numBytesDecoded >= MAX_SAFARI_DECODE_BYTES) {
+        cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
+        cachedTextDecoder.decode();
+        numBytesDecoded = len;
+    }
     return cachedTextDecoder.decode(getUint8ArrayMemory0().subarray(ptr, ptr + len));
 }
 
@@ -117,7 +115,7 @@ let WASM_VECTOR_LEN = 0;
  * @param {string} eth_signature
  * @returns {string[]}
  */
-function generate_keypair_from_eth_signature(eth_signature) {
+export function generate_keypair_from_eth_signature(eth_signature) {
     const ptr0 = passStringToWasm0(eth_signature, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
     const len0 = WASM_VECTOR_LEN;
     const ret = wasm.generate_keypair_from_eth_signature(ptr0, len0);
@@ -125,7 +123,6 @@ function generate_keypair_from_eth_signature(eth_signature) {
     wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
     return v2;
 }
-exports.generate_keypair_from_eth_signature = generate_keypair_from_eth_signature;
 
 /**
  * Get order message hash
@@ -148,7 +145,7 @@ exports.generate_keypair_from_eth_signature = generate_keypair_from_eth_signatur
  * @param {string} domain_revision
  * @returns {string}
  */
-function get_order_msg_hash(position_id, base_asset_id, base_amount, quote_asset_id, quote_amount, fee_amount, fee_asset_id, expiration, salt, user_public_key, domain_name, domain_version, domain_chain_id, domain_revision) {
+export function get_order_msg_hash(position_id, base_asset_id, base_amount, quote_asset_id, quote_amount, fee_amount, fee_asset_id, expiration, salt, user_public_key, domain_name, domain_version, domain_chain_id, domain_revision) {
     let deferred12_0;
     let deferred12_1;
     try {
@@ -182,7 +179,6 @@ function get_order_msg_hash(position_id, base_asset_id, base_amount, quote_asset
         wasm.__wbindgen_free(deferred12_0, deferred12_1, 1);
     }
 }
-exports.get_order_msg_hash = get_order_msg_hash;
 
 /**
  * Get transfer message hash
@@ -202,7 +198,7 @@ exports.get_order_msg_hash = get_order_msg_hash;
  * @param {string} collateral_id
  * @returns {string}
  */
-function get_transfer_msg_hash(recipient_position_id, sender_position_id, amount, expiration, salt, user_public_key, domain_name, domain_version, domain_chain_id, domain_revision, collateral_id) {
+export function get_transfer_msg_hash(recipient_position_id, sender_position_id, amount, expiration, salt, user_public_key, domain_name, domain_version, domain_chain_id, domain_revision, collateral_id) {
     let deferred9_0;
     let deferred9_1;
     try {
@@ -230,7 +226,6 @@ function get_transfer_msg_hash(recipient_position_id, sender_position_id, amount
         wasm.__wbindgen_free(deferred9_0, deferred9_1, 1);
     }
 }
-exports.get_transfer_msg_hash = get_transfer_msg_hash;
 
 /**
  * Get withdrawal message hash
@@ -250,7 +245,7 @@ exports.get_transfer_msg_hash = get_transfer_msg_hash;
  * @param {string} collateral_id
  * @returns {string}
  */
-function get_withdrawal_msg_hash(recipient_hex, position_id, amount, expiration, salt, user_public_key, domain_name, domain_version, domain_chain_id, domain_revision, collateral_id) {
+export function get_withdrawal_msg_hash(recipient_hex, position_id, amount, expiration, salt, user_public_key, domain_name, domain_version, domain_chain_id, domain_revision, collateral_id) {
     let deferred10_0;
     let deferred10_1;
     try {
@@ -280,20 +275,17 @@ function get_withdrawal_msg_hash(recipient_hex, position_id, amount, expiration,
         wasm.__wbindgen_free(deferred10_0, deferred10_1, 1);
     }
 }
-exports.get_withdrawal_msg_hash = get_withdrawal_msg_hash;
 
 /**
  * Initialize the WASM module
  */
-function init() {
+export function init() {
     wasm.main();
 }
-exports.init = init;
 
-function main() {
+export function main() {
     wasm.main();
 }
-exports.main = main;
 
 /**
  * Compute Pedersen hash of two field elements
@@ -308,7 +300,7 @@ exports.main = main;
  * @param {string} b
  * @returns {string}
  */
-function pedersen_hash(a, b) {
+export function pedersen_hash(a, b) {
     let deferred3_0;
     let deferred3_1;
     try {
@@ -324,7 +316,6 @@ function pedersen_hash(a, b) {
         wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
     }
 }
-exports.pedersen_hash = pedersen_hash;
 
 /**
  * Sign a message hash with a private key
@@ -339,7 +330,7 @@ exports.pedersen_hash = pedersen_hash;
  * @param {string} msg_hash
  * @returns {string[]}
  */
-function sign(private_key, msg_hash) {
+export function sign(private_key, msg_hash) {
     const ptr0 = passStringToWasm0(private_key, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
     const len0 = WASM_VECTOR_LEN;
     const ptr1 = passStringToWasm0(msg_hash, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -349,15 +340,14 @@ function sign(private_key, msg_hash) {
     wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
     return v3;
 }
-exports.sign = sign;
 
-exports.__wbindgen_cast_2241b6af4c4b2941 = function(arg0, arg1) {
+export function __wbindgen_cast_2241b6af4c4b2941(arg0, arg1) {
     // Cast intrinsic for `Ref(String) -> Externref`.
     const ret = getStringFromWasm0(arg0, arg1);
     return ret;
 };
 
-exports.__wbindgen_init_externref_table = function() {
+export function __wbindgen_init_externref_table() {
     const table = wasm.__wbindgen_externrefs;
     const offset = table.grow(4);
     table.set(0, undefined);
@@ -366,10 +356,3 @@ exports.__wbindgen_init_externref_table = function() {
     table.set(offset + 2, true);
     table.set(offset + 3, false);
 };
-
-const wasmPath = `${__dirname}/stark_crypto_wasm_bg.wasm`;
-const wasmBytes = require('fs').readFileSync(wasmPath);
-const wasmModule = new WebAssembly.Module(wasmBytes);
-const wasm = exports.__wasm = new WebAssembly.Instance(wasmModule, imports).exports;
-
-wasm.__wbindgen_start();
