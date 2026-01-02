@@ -41,12 +41,11 @@ async function main() {
   const privateKey = process.env.X10_PRIVATE_KEY || '';
   const publicKey = process.env.X10_PUBLIC_KEY || '';
   const apiKey = process.env.X10_API_KEY || '';
-  const eoaPrivateKey = process.env.X10_EOA_PRIVATE_KEY || '';
   const environment = process.env.ENVIRONMENT || 'mainnet';
 
   // Validate credentials
-  if (!vaultId || !privateKey || !publicKey || !apiKey || !eoaPrivateKey) {
-    throw new Error('Missing required credentials in environment variables (need X10_EOA_PRIVATE_KEY)');
+  if (!vaultId || !privateKey || !publicKey || !apiKey) {
+    throw new Error('Missing required credentials in environment variables');
   }
 
   // Select config based on environment
@@ -79,12 +78,6 @@ async function main() {
       }
     }
 
-    // Get Arbitrum wallet address
-    console.log('\n2️⃣  Getting Arbitrum wallet address...');
-    const wallet = new ethers.Wallet(eoaPrivateKey.startsWith('0x') ? eoaPrivateKey : `0x${eoaPrivateKey}`);
-    const arbitrumAddress = wallet.address;
-    console.log(`   Arbitrum Wallet: ${arbitrumAddress}`);
-
     // Withdrawal amount (can be passed as argument or default to 0.1 USDC)
     const withdrawalAmount = new Decimal(process.argv[2] || '0.1');
     console.log(`\n💵 Withdrawal Amount: ${withdrawalAmount} USDC`);
@@ -104,7 +97,6 @@ async function main() {
     console.log('\n5️⃣  Creating withdrawal...');
     console.log(`   Amount: ${withdrawalAmount} USDC`);
     console.log(`   Chain: ARB (Arbitrum)`);
-    console.log(`   Destination: ${arbitrumAddress} (will receive on Arbitrum)`);
     
     // Generate nonce (timestamp-based)
     const nonce = Math.floor(Date.now() / 1000);
@@ -141,7 +133,6 @@ async function main() {
     console.log('='.repeat(80));
     console.log(`Amount: ${withdrawalAmount} USDC`);
     console.log(`Withdrawal ID: ${withdrawalResponse.data}`);
-    console.log(`Destination: ${arbitrumAddress}`);
     console.log('\nImportant Notes:');
     console.log('1. You must close all positions before withdrawing funds.');
     console.log('2. All open orders must be canceled before withdrawal.');
