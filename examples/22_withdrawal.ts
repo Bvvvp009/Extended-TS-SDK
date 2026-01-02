@@ -8,7 +8,6 @@
  * - Extended Exchange account with API credentials
  * - Available balance for withdrawal in your vault
  * - Environment variables configured in .env
- * - X10_EOA_PRIVATE_KEY for your Arbitrum wallet
  * - All positions must be closed
  * - All open orders must be canceled
  * 
