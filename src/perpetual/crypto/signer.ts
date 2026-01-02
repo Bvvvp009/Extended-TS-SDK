@@ -110,7 +110,7 @@ export async function initWasm(): Promise<void> {
         // Fallback: try legacy path or without -web suffix
         try {
           // @ts-ignore - WASM module path resolved at runtime by bundler
-          wasmModule = await import('../../wasm/stark_crypto_wasm-web') as WasmModule;
+          wasmModule = await import('../../../wasm/stark_crypto_wasm-web') as WasmModule;
           if (wasmModule.init) {
             await wasmModule.init();
           }
