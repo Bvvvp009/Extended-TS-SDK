@@ -93,7 +93,17 @@ try {
       fs.copyFileSync(src, dest);
       console.log(`  ✓ Copied ${file} -> ${path.basename(dest)}`);
     }
-  });
+  })  
+  // Patch web JS file to reference -web versions
+  const webJsPath = path.join(wasmOutputDir, 'stark_crypto_wasm-web.js');
+  if (fs.existsSync(webJsPath)) {
+    let webJsContent = fs.readFileSync(webJsPath, 'utf8');
+    webJsContent = webJsContent
+      .replace(/\.\/stark_crypto_wasm_bg\.wasm/g, './stark_crypto_wasm_bg-web.wasm')
+      .replace(/\.\/stark_crypto_wasm_bg\.js/g, './stark_crypto_wasm_bg-web.js');
+    fs.writeFileSync(webJsPath, webJsContent);
+    console.log('   Patched stark_crypto_wasm-web.js to reference -web files');
+  };
   
   // Also copy web files without -web suffix for browser bundlers that expect standard names
   // This allows bundlers to resolve wasm/stark_crypto_wasm.js in browser builds
@@ -127,4 +137,6 @@ console.log('\n✅ WASM signer build complete!');
 console.log(`   Output: ${wasmOutputDir}`);
 console.log('\n📝 Note: Users can rebuild their own WASM signer with:');
 console.log('   npm run build:signer:custom');
+
+
 
