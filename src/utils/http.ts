@@ -2,9 +2,9 @@
  * HTTP client utilities for X10 API
  */
 
-import { USER_AGENT, DEFAULT_REQUEST_TIMEOUT_SECONDS } from '../config';
-import { RateLimitException, NotAuthorizedException } from '../errors';
-import { X10BaseModel } from './model';
+import { USER_AGENT, DEFAULT_REQUEST_TIMEOUT_SECONDS } from '../config.js';
+import { RateLimitException, NotAuthorizedException } from '../errors.js';
+import { X10BaseModel } from './model.js';
 
 export type ApiResponseType<T> = T | T[] | number;
 

@@ -93,7 +93,8 @@ try {
       fs.copyFileSync(src, dest);
       console.log(`  ✓ Copied ${file} -> ${path.basename(dest)}`);
     }
-  })  
+  });
+  
   // Patch web JS file to reference -web versions
   const webJsPath = path.join(wasmOutputDir, 'stark_crypto_wasm-web.js');
   if (fs.existsSync(webJsPath)) {
@@ -102,31 +103,7 @@ try {
       .replace(/\.\/stark_crypto_wasm_bg\.wasm/g, './stark_crypto_wasm_bg-web.wasm')
       .replace(/\.\/stark_crypto_wasm_bg\.js/g, './stark_crypto_wasm_bg-web.js');
     fs.writeFileSync(webJsPath, webJsContent);
-    console.log('   Patched stark_crypto_wasm-web.js to reference -web files');
-  };
-  
-  // Also copy web files without -web suffix for browser bundlers that expect standard names
-  // This allows bundlers to resolve wasm/stark_crypto_wasm.js in browser builds
-  const webFilesStandard = ['stark_crypto_wasm_bg.wasm'];
-  webFilesStandard.forEach(file => {
-    const src = path.join(webPkgDir, file);
-    const dest = path.join(wasmOutputDir, file);
-    if (fs.existsSync(src)) {
-      fs.copyFileSync(src, dest);
-      console.log(`  ✓ Copied ${file} (browser standard)`);
-    }
-  });
-  
-  // Patch stark_crypto_wasm-web.js to reference -web versions of imported modules
-  // wasm-pack generates imports for ./stark_crypto_wasm_bg.js but we renamed it to -web version
-  const webJsPath = path.join(wasmOutputDir, 'stark_crypto_wasm-web.js');
-  if (fs.existsSync(webJsPath)) {
-    let webJsContent = fs.readFileSync(webJsPath, 'utf8');
-    webJsContent = webJsContent
-      .replace(/\.\/stark_crypto_wasm_bg\.wasm/g, './stark_crypto_wasm_bg-web.wasm')
-      .replace(/\.\/stark_crypto_wasm_bg\.js/g, './stark_crypto_wasm_bg-web.js');
-    fs.writeFileSync(webJsPath, webJsContent);
-    console.log(`  ✓ Patched stark_crypto_wasm-web.js to reference -web files`);
+    console.log('  ✓ Patched stark_crypto_wasm-web.js to reference -web files');
   }
 } catch (error) {
   console.error('❌ Failed to build browser target:', error.message);

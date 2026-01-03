@@ -3,7 +3,7 @@
  */
 
 import Decimal from 'decimal.js';
-import { Asset } from './assets';
+import { Asset } from './assets.js';
 
 /**
  * Rounding contexts

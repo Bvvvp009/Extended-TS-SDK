@@ -2,11 +2,11 @@
  * Base module for trading client modules
  */
 
-import { EndpointConfig } from '../configuration';
-import { StarkPerpetualAccount } from '../accounts';
-import { X10Error } from '../../errors';
-import { getUrl } from '../../utils/http';
-import { DEFAULT_REQUEST_TIMEOUT_SECONDS } from '../../config';
+import { EndpointConfig } from '../configuration.js';
+import { StarkPerpetualAccount } from '../accounts.js';
+import { X10Error } from '../../errors.js';
+import { getUrl } from '../../utils/http.js';
+import { DEFAULT_REQUEST_TIMEOUT_SECONDS } from '../../config.js';
 
 /**
  * Base module class for all trading client modules

@@ -3,10 +3,10 @@
  */
 
 import Decimal from 'decimal.js';
-import { X10BaseModel } from '../utils/model';
-import { isHexString } from '../utils/string';
-import { sign as wasmSign } from './crypto/signer';
-import { CustomStarkSigner, isCustomStarkSigner } from './custom-signer';
+import { X10BaseModel } from '../utils/model.js';
+import { isHexString } from '../utils/string.js';
+import { sign as wasmSign } from './crypto/signer.js';
+import { CustomStarkSigner, isCustomStarkSigner } from './custom-signer.js';
 
 /**
  * Stark Perpetual Account

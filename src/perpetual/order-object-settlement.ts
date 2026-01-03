@@ -3,14 +3,14 @@
  */
 
 import Decimal from 'decimal.js';
-import { MarketModel } from './markets';
-import { TradingFeeModel } from './fees';
-import { StarknetDomain } from './configuration';
-import { OrderSide, StarkSettlementModel, StarkDebuggingOrderAmountsModel } from './orders';
-import { SettlementSignatureModel } from '../utils/model';
-import { HumanReadableAmount, StarkAmount, ROUNDING_BUY_CONTEXT, ROUNDING_SELL_CONTEXT, ROUNDING_FEE_CONTEXT } from './amounts';
-import { getOrderMsgHash } from './crypto/signer';
-import { StarkPerpetualAccount } from './accounts';
+import { MarketModel } from './markets.js';
+import { TradingFeeModel } from './fees.js';
+import { StarknetDomain } from './configuration.js';
+import { OrderSide, StarkSettlementModel, StarkDebuggingOrderAmountsModel } from './orders.js';
+import { SettlementSignatureModel } from '../utils/model.js';
+import { HumanReadableAmount, StarkAmount, ROUNDING_BUY_CONTEXT, ROUNDING_SELL_CONTEXT, ROUNDING_FEE_CONTEXT } from './amounts.js';
+import { getOrderMsgHash } from './crypto/signer.js';
+import { StarkPerpetualAccount } from './accounts.js';
 
 /**
  * Order settlement data

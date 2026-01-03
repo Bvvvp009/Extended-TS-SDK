@@ -2,9 +2,9 @@
  * Perpetual stream client for WebSocket streaming
  */
 
-import { PerpetualStreamConnection } from './perpetual-stream-connection';
-import { WrappedStreamResponse } from '../../utils/http';
-import { getUrl } from '../../utils/http';
+import { PerpetualStreamConnection } from './perpetual-stream-connection.js';
+import { WrappedStreamResponse } from '../../utils/http.js';
+import { getUrl } from '../../utils/http.js';
 
 /**
  * Perpetual Stream Client for X10 WebSocket v1

@@ -3,8 +3,8 @@
  */
 
 import Decimal from 'decimal.js';
-import { X10BaseModel, HexValue } from '../utils/model';
-import { SettlementSignatureModel } from '../utils/model';
+import { X10BaseModel, HexValue } from '../utils/model.js';
+import { SettlementSignatureModel } from '../utils/model.js';
 
 /**
  * Stark transfer settlement

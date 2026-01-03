@@ -3,7 +3,7 @@
  */
 
 import Decimal from 'decimal.js';
-import { X10BaseModel } from '../utils/model';
+import { X10BaseModel } from '../utils/model.js';
 
 /**
  * Trading fee model

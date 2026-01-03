@@ -3,7 +3,7 @@
  */
 
 import Decimal from 'decimal.js';
-import { X10BaseModel, HexValue } from '../utils/model';
+import { X10BaseModel, HexValue } from '../utils/model.js';
 
 /**
  * Asset model

@@ -3,33 +3,33 @@
  */
 
 import Decimal from 'decimal.js';
-import { BaseModule } from './base-module';
+import { BaseModule } from './base-module.js';
 import {
   WrappedApiResponse,
   sendGetRequest,
   sendPatchRequest,
   sendPostRequest,
   sendDeleteRequest,
-} from '../../utils/http';
-import { EmptyModel } from '../../utils/model';
+} from '../../utils/http.js';
+import { EmptyModel } from '../../utils/model.js';
 import {
   AccountModel,
   AccountLeverage,
   BalanceModel,
-} from '../accounts';
+} from '../accounts.js';
 import {
   OrderSide,
   OrderType,
   OpenOrderModel,
-} from '../orders';
-import { TradingFeeModel } from '../fees';
-import { MarketModel } from '../markets';
-import { toEpochMillis } from '../../utils/date';
-import { ClientModel } from '../clients';
-import { BridgesConfig, Quote } from '../bridges';
-import { TransferResponseModel } from '../transfers';
-import { createTransferObject } from '../transfer-object';
-import { createWithdrawalObject } from '../withdrawal-object';
+} from '../orders.js';
+import { TradingFeeModel } from '../fees.js';
+import { MarketModel } from '../markets.js';
+import { toEpochMillis } from '../../utils/date.js';
+import { ClientModel } from '../clients.js';
+import { BridgesConfig, Quote } from '../bridges.js';
+import { TransferResponseModel } from '../transfers.js';
+import { createTransferObject } from '../transfer-object.js';
+import { createWithdrawalObject } from '../withdrawal-object.js';
 
 /**
  * Account module for managing account operations
@@ -350,11 +350,9 @@ export class AccountModule extends BaseModule {
     let recipientStarkAddress: string | undefined = options.starkAddress;
 
     if (!recipientStarkAddress) {
-      // First try to use account's bridgeStarknetAddress
       if (account.bridgeStarknetAddress) {
         recipientStarkAddress = account.bridgeStarknetAddress;
       } else if (chainId === 'STRK') {
-        // Fallback to client's starknetWalletAddress for STRK chain
         const clientResponse = await this.getClient();
         const client = clientResponse.data;
         

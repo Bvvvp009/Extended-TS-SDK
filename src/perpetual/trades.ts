@@ -3,8 +3,8 @@
  */
 
 import Decimal from 'decimal.js';
-import { X10BaseModel } from '../utils/model';
-import { OrderSide } from './orders';
+import { X10BaseModel } from '../utils/model.js';
+import { OrderSide } from './orders.js';
 
 /**
  * Trade type

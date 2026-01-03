@@ -10,10 +10,10 @@
  */
 
 // Initialize WASM module
-export { initWasm } from './perpetual/crypto/signer';
+export { initWasm } from './perpetual/crypto/signer.js';
 
 // Configuration
-export { EndpointConfig, StarknetDomain, TESTNET_CONFIG, MAINNET_CONFIG } from './perpetual/configuration';
+export { EndpointConfig, StarknetDomain, TESTNET_CONFIG, MAINNET_CONFIG } from './perpetual/configuration.js';
 
 // Accounts
 export { 
@@ -22,14 +22,14 @@ export {
   AccountLeverage, 
   BalanceModel,
   createStarkPerpetualAccountWithCustomSigner
-} from './perpetual/accounts';
+} from './perpetual/accounts.js';
 
 // Custom Signer Support
 export { 
   CustomStarkSigner, 
   SignatureResult, 
   isCustomStarkSigner 
-} from './perpetual/custom-signer';
+} from './perpetual/custom-signer.js';
 
 // Orders
 export {
@@ -46,51 +46,51 @@ export {
   PlacedOrderModel,
   OpenOrderModel,
   CreateOrderTpslTriggerModel,
-} from './perpetual/orders';
+} from './perpetual/orders.js';
 
 // Trading Client
-export { PerpetualTradingClient } from './perpetual/trading-client/trading-client';
-export { AccountModule } from './perpetual/trading-client/account-module';
-export { OrderManagementModule } from './perpetual/trading-client/order-management-module';
-export { MarketsInformationModule } from './perpetual/trading-client/markets-information-module';
-export { InfoModule } from './perpetual/trading-client/info-module';
-export { TestnetModule } from './perpetual/trading-client/testnet-module';
+export { PerpetualTradingClient } from './perpetual/trading-client/trading-client.js';
+export { AccountModule } from './perpetual/trading-client/account-module.js';
+export { OrderManagementModule } from './perpetual/trading-client/order-management-module.js';
+export { MarketsInformationModule } from './perpetual/trading-client/markets-information-module.js';
+export { InfoModule } from './perpetual/trading-client/info-module.js';
+export { TestnetModule } from './perpetual/trading-client/testnet-module.js';
 
 // User Client
-export { UserClient } from './perpetual/user-client/user-client';
-export { OnBoardedAccount, StarkKeyPair } from './perpetual/user-client/onboarding';
+export { UserClient } from './perpetual/user-client/user-client.js';
+export { OnBoardedAccount, StarkKeyPair } from './perpetual/user-client/onboarding.js';
 
 // Stream Client
-export { PerpetualStreamClient } from './perpetual/stream-client/stream-client';
-export { PerpetualStreamConnection } from './perpetual/stream-client/perpetual-stream-connection';
+export { PerpetualStreamClient } from './perpetual/stream-client/stream-client.js';
+export { PerpetualStreamConnection } from './perpetual/stream-client/perpetual-stream-connection.js';
 
 // Positions & Trades
-export { PositionModel, PositionHistoryModel, PositionSide, PositionStatus, ExitType } from './perpetual/positions';
-export { AccountTradeModel, PublicTradeModel, TradeType } from './perpetual/trades';
+export { PositionModel, PositionHistoryModel, PositionSide, PositionStatus, ExitType } from './perpetual/positions.js';
+export { AccountTradeModel, PublicTradeModel, TradeType } from './perpetual/trades.js';
 
 // Order Objects
-export { createOrderObject, OrderTpslTriggerParam } from './perpetual/order-object';
+export { createOrderObject, OrderTpslTriggerParam } from './perpetual/order-object.js';
 
 // Markets
-export { MarketModel, MarketStatsModel, TradingConfigModel } from './perpetual/markets';
+export { MarketModel, MarketStatsModel, TradingConfigModel } from './perpetual/markets.js';
 
 // Assets
-export { Asset, AssetOperationType, AssetOperationStatus } from './perpetual/assets';
+export { Asset, AssetOperationType, AssetOperationStatus } from './perpetual/assets.js';
 
 // Fees
-export { TradingFeeModel, DEFAULT_FEES } from './perpetual/fees';
+export { TradingFeeModel, DEFAULT_FEES } from './perpetual/fees.js';
 
 // Errors
-export { X10Error, RateLimitException, NotAuthorizedException, SubAccountExists } from './errors';
+export { X10Error, RateLimitException, NotAuthorizedException, SubAccountExists } from './errors.js';
 
 // Utils
-export { WrappedApiResponse, WrappedStreamResponse, StreamDataType } from './utils/http';
-export { X10BaseModel, SettlementSignatureModel } from './utils/model';
-export { generateNonce } from './utils/nonce';
-export { utcNow, toEpochMillis } from './utils/date';
+export { WrappedApiResponse, WrappedStreamResponse, StreamDataType } from './utils/http.js';
+export { X10BaseModel, SettlementSignatureModel } from './utils/model.js';
+export { generateNonce } from './utils/nonce.js';
+export { utcNow, toEpochMillis } from './utils/date.js';
 
 // Utils
-export * from './utils/env';
+export * from './utils/env.js';
 
 // Cryptographic Signer Functions (exported for standalone use)
 export {
@@ -100,7 +100,7 @@ export {
   getOrderMsgHash,
   getTransferMsgHash,
   getWithdrawalMsgHash,
-} from './perpetual/crypto/signer';
+} from './perpetual/crypto/signer.js';
 
 // Version
 export const SDK_VERSION = '0.0.1';

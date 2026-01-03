@@ -2,9 +2,9 @@
  * Info module for trading client
  */
 
-import { BaseModule } from './base-module';
-import { WrappedApiResponse, sendGetRequest } from '../../utils/http';
-import { X10BaseModel } from '../../utils/model';
+import { BaseModule } from './base-module.js';
+import { WrappedApiResponse, sendGetRequest } from '../../utils/http.js';
+import { X10BaseModel } from '../../utils/model.js';
 
 /**
  * Settings model

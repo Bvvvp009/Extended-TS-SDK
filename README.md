@@ -1,6 +1,6 @@
-# Extended TypeScript Trading SDK
+# Extended TypeScript SDK
 
-**⚠️ Unofficial SDK**: This is an **unofficial TypeScript SDK** for Extended Exchange, built and maintained by the community. It is not officially supported by Extended.
+This is a community-maintained TypeScript SDK for Extended Exchange. It is not officially supported by Extended.
 
 TypeScript client for [Extended Exchange API](https://api.docs.extended.exchange/).
 
@@ -15,6 +15,104 @@ This SDK provides full type safety and modern async/await patterns for interacti
 ```bash
 npm install extended-typescript-sdk
 ```
+
+**✅ Node.js Backend:** Works immediately - no configuration needed!
+
+**⚙️ Browser/Frontend:** Requires one-time bundler configuration (see below)
+
+---
+
+### Browser Bundler Setup
+
+This SDK uses WebAssembly for cryptographic operations. Bundlers need configuration to handle WASM files.
+
+<details>
+<summary><b>Vite Configuration</b></summary>
+
+**Install the plugin:**
+```bash
+npm install --save-dev vite-plugin-static-copy
+```
+
+**Configure `vite.config.ts`:**
+```typescript
+import { defineConfig } from 'vite';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
+
+export default defineConfig({
+  plugins: [
+    viteStaticCopy({
+      targets: [{
+        src: 'node_modules/extended-typescript-sdk/wasm/*',
+        dest: 'wasm'
+      }]
+    })
+  ],
+  optimizeDeps: {
+    exclude: ['extended-typescript-sdk']
+  },
+  build: {
+    rollupOptions: {
+      external: [/\.wasm$/, /extended-typescript-sdk\/wasm\//, /^\/wasm\//]
+    }
+  }
+});
+```
+
+**What this does:**
+- ✅ Copies WASM files to `dist/wasm/` during build
+- ✅ Prevents Rollup from trying to bundle WASM binaries
+- ✅ Works in both dev and production modes
+
+</details>
+
+<details>
+<summary><b>Webpack Configuration</b></summary>
+
+**Add to `webpack.config.js`:**
+```javascript
+module.exports = {
+  experiments: {
+    asyncWebAssembly: true,
+  },
+  module: {
+    rules: [
+      {
+        test: /\.wasm$/,
+        type: 'webassembly/async',
+      },
+    ],
+  },
+};
+```
+
+</details>
+
+<details>
+<summary><b>Rollup Configuration</b></summary>
+
+**Install plugin:**
+```bash
+npm install --save-dev @rollup/plugin-wasm
+```
+
+**Configure `rollup.config.js`:**
+```javascript
+import wasm from '@rollup/plugin-wasm';
+
+export default {
+  plugins: [
+    wasm({
+      maxFileSize: 10000000, // 10MB
+      targetEnv: 'auto',
+    }),
+  ],
+};
+```
+
+</details>
+
+---
 
 ## Prerequisites
 
@@ -181,6 +279,83 @@ for await (const update of accountStream) {
   console.log('Account update:', update);
 }
 ```
+
+## Bundler Configuration (Vite, Rollup, Webpack)
+
+If you're using **Vite, Rollup, Webpack, or Next.js**, you may encounter WASM-related build errors. Here's how to fix them:
+
+### Vite Configuration
+
+Add this to your `vite.config.js` or `vite.config.ts`:
+
+```javascript
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  optimizeDeps: {
+    exclude: ['extended-typescript-sdk']
+  },
+  assetsInclude: ['**/*.wasm'],
+});
+```
+
+### Common Build Error
+
+If you see this error:
+```
+Could not resolve "./stark_crypto_wasm_bg.js" from "node_modules/extended-typescript-sdk/wasm/..."
+```
+
+**Solution**: Add the SDK to the `exclude` list in your bundler configuration:
+
+```javascript
+// vite.config.js
+export default {
+  optimizeDeps: {
+    exclude: ['extended-typescript-sdk']
+  }
+}
+```
+
+### Other Bundlers
+
+#### Webpack 5
+```javascript
+module.exports = {
+  experiments: {
+    asyncWebAssembly: true,
+  },
+};
+```
+
+#### Next.js
+```javascript
+// next.config.js
+module.exports = {
+  webpack: (config) => {
+    config.experiments = {
+      ...config.experiments,
+      asyncWebAssembly: true,
+    };
+    return config;
+  },
+};
+```
+
+#### Rollup
+```bash
+npm install --save-dev @rollup/plugin-wasm
+```
+
+```javascript
+import wasm from '@rollup/plugin-wasm';
+
+export default {
+  plugins: [wasm({ targetEnv: 'auto' })],
+};
+```
+
+> 📖 **For detailed bundler configurations and troubleshooting**, see [BUNDLER_CONFIG.md](./BUNDLER_CONFIG.md)
 
 ## WASM Signer
 

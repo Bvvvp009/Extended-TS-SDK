@@ -3,9 +3,9 @@
  */
 
 import Decimal from 'decimal.js';
-import { StarkPerpetualAccount } from './accounts';
-import { MarketModel } from './markets';
-import { StarknetDomain } from './configuration';
+import { StarkPerpetualAccount } from './accounts.js';
+import { MarketModel } from './markets.js';
+import { StarknetDomain } from './configuration.js';
 import {
   OrderSide,
   OrderTpslType,
@@ -17,15 +17,15 @@ import {
   NewOrderModel,
   CreateOrderTpslTriggerModel,
   StarkSettlementModel,
-} from './orders';
+} from './orders.js';
 import {
   OrderSettlementData,
   SettlementDataCtx,
   createOrderSettlementData,
-} from './order-object-settlement';
-import { generateNonce } from '../utils/nonce';
-import { utcNow, toEpochMillis } from '../utils/date';
-import { DEFAULT_FEES } from './fees';
+} from './order-object-settlement.js';
+import { generateNonce } from '../utils/nonce.js';
+import { utcNow, toEpochMillis } from '../utils/date.js';
+import { DEFAULT_FEES } from './fees.js';
 
 /**
  * Order TPSL trigger parameter

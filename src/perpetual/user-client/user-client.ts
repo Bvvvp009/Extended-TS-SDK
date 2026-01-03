@@ -3,18 +3,18 @@
  */
 
 import { ethers } from 'ethers';
-import { EndpointConfig } from '../configuration';
-import { AccountModel, ApiKeyRequestModel, ApiKeyResponseModel } from '../accounts';
-import { SubAccountExists } from '../../errors';
-import { getUrl, sendGetRequest, sendPostRequest, sendDeleteRequest } from '../../utils/http';
-import { utcNow } from '../../utils/date';
+import { EndpointConfig } from '../configuration.js';
+import { AccountModel, ApiKeyRequestModel, ApiKeyResponseModel } from '../accounts.js';
+import { SubAccountExists } from '../../errors.js';
+import { getUrl, sendGetRequest, sendPostRequest, sendDeleteRequest } from '../../utils/http.js';
+import { utcNow } from '../../utils/date.js';
 import {
   OnBoardedAccount,
   StarkKeyPair,
   getL2KeysFromL1Account,
   getOnboardingPayload,
   getSubAccountCreationPayload,
-} from './onboarding';
+} from './onboarding.js';
 
 const L1_AUTH_SIGNATURE_HEADER = 'L1_SIGNATURE';
 const L1_MESSAGE_TIME_HEADER = 'L1_MESSAGE_TIME';

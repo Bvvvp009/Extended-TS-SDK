@@ -3,9 +3,9 @@
  */
 
 import WebSocket from 'ws';
-import { USER_AGENT } from '../../config';
-import { RequestHeader } from '../../utils/http';
-import { WrappedStreamResponse } from '../../utils/http';
+import { USER_AGENT } from '../../config.js';
+import { RequestHeader } from '../../utils/http.js';
+import { WrappedStreamResponse } from '../../utils/http.js';
 
 /**
  * Perpetual stream connection

@@ -44,89 +44,104 @@ export async function initWasm(): Promise<void> {
   }
 
   try {
-    // Load local WASM build from shipped wasm/ folder
-    // Supports both Node.js and browser environments
-    // Detect Node.js: check for process.versions.node (not just process, as bundlers may polyfill it)
     const isNode = typeof process !== 'undefined' && 
                    process.versions && 
-                   typeof process.versions.node === 'string' &&
-                   typeof require !== 'undefined';
+                   typeof process.versions.node === 'string';
     
     if (isNode) {
-      // Node.js environment - use require/fs
-      const path = require('path');
-      const fs = require('fs');
-      let wasmPath: string | undefined;
+      const hasRequire = typeof require !== 'undefined';
+      const hasDirname = typeof __dirname !== 'undefined';
       
-      // Try shipped wasm/ folder first (included in npm package)
-      const possiblePaths = [
-        path.join(__dirname, '../../../wasm/stark_crypto_wasm'),  // From dist/perpetual/crypto/ to root wasm/
-        path.join(__dirname, '../../wasm/stark_crypto_wasm'),     // Legacy path (if wasm in dist/)
-        path.join(process.cwd(), 'wasm/stark_crypto_wasm'),
-        path.join(process.cwd(), 'node_modules/extended-typescript-sdk/wasm/stark_crypto_wasm'),
-        // Fallback to build directory (for development)
-        path.join(__dirname, '../../../wasm-signer/pkg/stark_crypto_wasm'),
-        path.join(__dirname, '../../wasm-signer/pkg/stark_crypto_wasm'),
-        path.join(process.cwd(), 'wasm-signer/pkg/stark_crypto_wasm'),
-      ];
-      
-      for (const testPath of possiblePaths) {
-        if (fs.existsSync(testPath + '.js') || fs.existsSync(testPath + '.d.ts')) {
-          wasmPath = testPath;
-          break;
+      if (hasRequire && hasDirname) {
+        const path = require('path');
+        const fs = require('fs');
+        
+        const possiblePaths = [
+          path.join(__dirname, '../../../wasm/stark_crypto_wasm.js'),
+          path.join(__dirname, '../../wasm/stark_crypto_wasm.js'),
+          path.join(process.cwd(), 'wasm/stark_crypto_wasm.js'),
+          path.join(process.cwd(), 'node_modules/extended-typescript-sdk/wasm/stark_crypto_wasm.js'),
+        ];
+        
+        let wasmPath: string | undefined;
+        for (const testPath of possiblePaths) {
+          if (fs.existsSync(testPath)) {
+            wasmPath = testPath;
+            break;
+          }
+        }
+        
+        if (!wasmPath) {
+          throw new Error(`WASM module not found. Tried: ${possiblePaths.join(', ')}`);
+        }
+        
+        wasmModule = require(wasmPath) as WasmModule;
+        if (wasmModule.init) {
+          wasmModule.init();
+        }
+      } else {
+        const pathModule = await import('path');
+        const fsModule = await import('fs');
+        const { createRequire } = await import('module');
+        const basePath = process.cwd();
+        
+        const possiblePaths = [
+          pathModule.join(basePath, 'node_modules/extended-typescript-sdk/wasm/stark_crypto_wasm.js'),
+          pathModule.join(basePath, 'node_modules/extended-typescript-sdk/dist/esm/wasm/stark_crypto_wasm.js'),
+          pathModule.join(basePath, 'dist/esm/wasm/stark_crypto_wasm.js'),
+          pathModule.join(basePath, 'wasm/stark_crypto_wasm.js'),
+        ];
+        
+        let wasmPath: string | undefined;
+        for (const testPath of possiblePaths) {
+          if (fsModule.existsSync(testPath)) {
+            wasmPath = testPath;
+            break;
+          }
+        }
+        
+        if (!wasmPath) {
+          throw new Error(`WASM module not found. Tried: ${possiblePaths.join(', ')}`);
+        }
+        
+        const wasmUrl = pathModule.isAbsolute(wasmPath) 
+          ? `file:///${wasmPath.replace(/\\/g, '/')}`
+          : wasmPath;
+        const requireFunc = createRequire(wasmUrl);
+        wasmModule = requireFunc(wasmPath) as WasmModule;
+        if (wasmModule.init) {
+          wasmModule.init();
         }
       }
-      
-      if (!wasmPath) {
-        throw new Error(
-          `WASM module not found. Tried: ${possiblePaths.join(', ')}\n` +
-          `Please run: npm run build:signer\n` +
-          `Or if you want to build your own: npm run build:signer:custom`
-        );
-      }
-      
-      // Use absolute path for require()
-      const absoluteWasmPath = path.resolve(wasmPath);
-      
-      // Use require() for CommonJS modules (patched nodejs target)
-      wasmModule = require(absoluteWasmPath) as WasmModule;
-      
-      // Initialize the WASM module
-      if (wasmModule.init) {
-        wasmModule.init();
-      }
     } else {
-      // Browser environment - use dynamic import
-      // Try to load from wasm/ folder (bundler will handle this)
       try {
-        // For browser, we expect the bundler to handle WASM imports
-        // @ts-ignore - WASM module path resolved at runtime by bundler
-        wasmModule = await import('../../../wasm/stark_crypto_wasm-web') as WasmModule;
+        // @ts-ignore
+        wasmModule = await import('/wasm/stark_crypto_wasm-web.js') as WasmModule;
         
         if (wasmModule.init) {
           await wasmModule.init();
         }
       } catch (browserError: any) {
-        // Fallback: try legacy path or without -web suffix
         try {
-          // @ts-ignore - WASM module path resolved at runtime by bundler
-          wasmModule = await import('../../wasm/stark_crypto_wasm-web') as WasmModule;
+          // @ts-ignore
+          wasmModule = await import('extended-typescript-sdk/wasm/stark_crypto_wasm-web.js') as WasmModule;
           if (wasmModule.init) {
             await wasmModule.init();
           }
-        } catch (legacyError: any) {
+        } catch (packageError: any) {
           try {
-            // @ts-ignore - WASM module path resolved at runtime by bundler
-            wasmModule = await import('../../../wasm/stark_crypto_wasm') as WasmModule;
+            // @ts-ignore
+            wasmModule = await import('extended-typescript-sdk/wasm/stark_crypto_wasm-web') as WasmModule;
             if (wasmModule.init) {
               await wasmModule.init();
             }
           } catch (fallbackError: any) {
             throw new Error(
               `Failed to load WASM module in browser environment.\n` +
-              `Make sure to build with browser target: npm run build:signer\n` +
-              `Tried: ../../../wasm/stark_crypto_wasm-web, ../../wasm/stark_crypto_wasm-web, ../../../wasm/stark_crypto_wasm\n` +
-              `Error: ${browserError.message || browserError}`
+              `Make sure WASM files are in /wasm/ folder or build with: npm run build:signer\n` +
+              `Tried: /wasm/stark_crypto_wasm-web.js, extended-typescript-sdk/wasm/*\n` +
+              `Errors: ${browserError.message}\n` +
+              `Package error: ${packageError.message}`
             );
           }
         }
@@ -179,9 +194,8 @@ export function sign(privateKey: bigint, msgHash: bigint): [bigint, bigint] {
   const privHex = '0x' + privateKey.toString(16);
   const hashHex = '0x' + msgHash.toString(16);
   
-  // Use local WASM for signing
   if (!wasmModule!.sign) {
-    throw new Error('WASM sign function not available. Make sure the WASM module is properly built.');
+    throw new Error('WASM sign function not available.');
   }
 
   const result = wasmModule!.sign(privHex, hashHex);
