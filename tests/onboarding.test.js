@@ -5,12 +5,12 @@ const path = require('path');
 // Import from built dist (the test script runs build first)
 const {
   initWasm,
-} = require('../dist');
+} = require('../dist/cjs');
 
 const {
   getL2KeysFromL1Account,
   getOnboardingPayload,
-} = require('../dist/perpetual/user-client/onboarding');
+} = require('../dist/cjs/perpetual/user-client/onboarding');
 
 describe('Onboarding', () => {
   it('derives L2 keys and onboarding payload matching test vectors', async () => {

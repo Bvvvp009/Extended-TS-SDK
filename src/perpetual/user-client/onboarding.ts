@@ -3,7 +3,6 @@
  */
 
 import { ethers } from 'ethers';
-import Decimal from 'decimal.js';
 import { AccountModel } from '../accounts.js';
 import { X10BaseModel } from '../../utils/model.js';
 import { generateKeypairFromEthSignature, pedersenHash, sign as starkSign } from '../crypto/signer.js';

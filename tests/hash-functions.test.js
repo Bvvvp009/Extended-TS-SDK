@@ -1,6 +1,6 @@
 /* Golden test for order/transfer/withdrawal hash functions */
 
-const { initWasm, getOrderMsgHash, getTransferMsgHash, getWithdrawalMsgHash } = require('../dist/perpetual/crypto/signer');
+const { initWasm, getOrderMsgHash, getTransferMsgHash, getWithdrawalMsgHash } = require('../dist/cjs/perpetual/crypto/signer');
 
 describe('Hash Functions', () => {
   beforeAll(async () => {

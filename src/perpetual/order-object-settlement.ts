@@ -10,7 +10,6 @@ import { OrderSide, StarkSettlementModel, StarkDebuggingOrderAmountsModel } from
 import { SettlementSignatureModel } from '../utils/model.js';
 import { HumanReadableAmount, StarkAmount, ROUNDING_BUY_CONTEXT, ROUNDING_SELL_CONTEXT, ROUNDING_FEE_CONTEXT } from './amounts.js';
 import { getOrderMsgHash } from './crypto/signer.js';
-import { StarkPerpetualAccount } from './accounts.js';
 
 /**
  * Order settlement data

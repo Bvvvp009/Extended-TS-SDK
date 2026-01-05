@@ -116,19 +116,19 @@ export async function initWasm(): Promise<void> {
     } else {
       try {
         // @ts-ignore
-        wasmModule = await import('/wasm/stark_crypto_wasm-web.js') as WasmModule;
+        wasmModule = await import('extended-typescript-sdk/wasm/stark_crypto_wasm-web.js') as WasmModule;
         
         if (wasmModule.init) {
           await wasmModule.init();
         }
-      } catch (browserError: any) {
+      } catch (packageError: any) {
         try {
           // @ts-ignore
-          wasmModule = await import('extended-typescript-sdk/wasm/stark_crypto_wasm-web.js') as WasmModule;
+          wasmModule = await import('/wasm/stark_crypto_wasm-web.js') as WasmModule;
           if (wasmModule.init) {
             await wasmModule.init();
           }
-        } catch (packageError: any) {
+        } catch (absoluteError: any) {
           try {
             // @ts-ignore
             wasmModule = await import('extended-typescript-sdk/wasm/stark_crypto_wasm-web') as WasmModule;
@@ -137,11 +137,9 @@ export async function initWasm(): Promise<void> {
             }
           } catch (fallbackError: any) {
             throw new Error(
-              `Failed to load WASM module in browser environment.\n` +
-              `Make sure WASM files are in /wasm/ folder or build with: npm run build:signer\n` +
-              `Tried: /wasm/stark_crypto_wasm-web.js, extended-typescript-sdk/wasm/*\n` +
-              `Errors: ${browserError.message}\n` +
-              `Package error: ${packageError.message}`
+              `Failed to load WASM module in browser.\n` +
+              `Tried: extended-typescript-sdk/wasm/*, /wasm/*\n` +
+              `Errors: ${packageError.message}, ${absoluteError.message}`
             );
           }
         }

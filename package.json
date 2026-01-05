@@ -1,6 +1,6 @@
 {
   "name": "extended-typescript-sdk",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Community-maintained TypeScript SDK for Extended Exchange - A perpetual DEX built by ex-Revolut team",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -14,7 +14,15 @@
       "default": "./dist/esm/index.js"
     },
     "./package.json": "./package.json",
-    "./wasm/*": "./wasm/*"
+    "./wasm/*": "./wasm/*",
+    "./utils/websocket": {
+      "types": "./dist/esm/utils/websocket.d.ts",
+      "import": "./dist/esm/utils/websocket.js",
+      "require": "./dist/cjs/utils/websocket.js",
+      "default": "./dist/esm/utils/websocket.js"
+    },
+    "./dist/esm/*": "./dist/esm/*",
+    "./dist/cjs/*": "./dist/cjs/*"
   },
   "scripts": {
     "build": "npm run build:signer && npm run build:esm && npm run build:cjs && npm run build:post",
@@ -27,6 +35,9 @@
     "clean": "rm -rf dist wasm wasm-signer/pkg wasm-signer/pkg-web wasm-signer/target",
     "prepublishOnly": "npm run build",
     "test": "npm run build && jest",
+    "test:compat": "npm run build && jest tests/compat/",
+    "test:cjs-esm": "npm run build && jest tests/compat/cjs-esm-wasm.test.js",
+    "test:vite": "npm run build && jest tests/compat/vite-bundling.test.js",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write \"src/**/*.ts\""
   },
@@ -67,7 +78,8 @@
     "prettier": "^3.2.4",
     "ts-jest": "^29.4.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vite": "^7.3.0"
   },
   "files": [
     "dist",

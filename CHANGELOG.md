@@ -5,6 +5,35 @@ All notable changes to the Extended TypeScript SDK will be documented in this fi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.7] - 2026-01-04
+
+### Fixed
+- **🎉 Zero-Config Browser Support**: Fixed WASM loading for true zero-configuration browser usage
+  - Reversed WASM import order to prioritize package path over absolute path
+  - Dev servers (Vite, Webpack Dev Server) now work without manual WASM folder copying
+  - Eliminated "Failed to resolve import '/wasm/...'" errors in development
+
+- **Cross-Platform WebSocket Compatibility**: Added unified WebSocket wrapper
+  - Automatically uses native `WebSocket` in browsers
+  - Falls back to `'ws'` package in Node.js environments
+  - Fixes "Cannot find module 'ws'" errors in browser builds
+  - Maintains consistent API across all environments
+
+### Technical Details
+- Modified `src/perpetual/crypto/signer.ts` import priority:
+  - Now tries: `extended-typescript-sdk/wasm/*` first (works in dev/prod)
+  - Fallback: `/wasm/*` (for custom configurations)
+- Created `src/utils/websocket.ts` cross-platform wrapper:
+  - Runtime environment detection
+  - Unified event-based API (`.on()`, `.once()`, `.off()`)
+  - Static constants (`OPEN`, `CLOSED`, etc.) for both environments
+
+### Result
+✅ **Node.js Backend**: Zero-config (unchanged)  
+✅ **Browser/Frontend**: Zero-config with bundler plugin only  
+✅ **Vite Dev Server**: Works immediately after `npm install`  
+✅ **Production Builds**: WASM files copied automatically
+
 ## [0.0.6] - 2026-01-03
 
 ### Fixed

@@ -9,7 +9,6 @@ import {
   sendGetRequest,
   sendPatchRequest,
   sendPostRequest,
-  sendDeleteRequest,
 } from '../../utils/http.js';
 import { EmptyModel } from '../../utils/model.js';
 import {
@@ -23,8 +22,6 @@ import {
   OpenOrderModel,
 } from '../orders.js';
 import { TradingFeeModel } from '../fees.js';
-import { MarketModel } from '../markets.js';
-import { toEpochMillis } from '../../utils/date.js';
 import { ClientModel } from '../clients.js';
 import { BridgesConfig, Quote } from '../bridges.js';
 import { TransferResponseModel } from '../transfers.js';

@@ -7,7 +7,7 @@ const {
   isCustomStarkSigner,
   createStarkPerpetualAccountWithCustomSigner,
   StarkPerpetualAccount,
-} = require('../dist/index');
+} = require('../dist/cjs/index');
 
 describe('Custom Signer', () => {
   describe('isCustomStarkSigner', () => {

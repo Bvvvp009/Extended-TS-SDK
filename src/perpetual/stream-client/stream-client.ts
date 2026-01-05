@@ -3,7 +3,6 @@
  */
 
 import { PerpetualStreamConnection } from './perpetual-stream-connection.js';
-import { WrappedStreamResponse } from '../../utils/http.js';
 import { getUrl } from '../../utils/http.js';
 
 /**

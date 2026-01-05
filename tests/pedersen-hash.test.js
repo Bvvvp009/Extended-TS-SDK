@@ -1,7 +1,7 @@
 /* Test pedersen_hash function */
 
-const { initWasm } = require('../dist');
-const { pedersenHash } = require('../dist/perpetual/crypto/signer');
+const { initWasm } = require('../dist/cjs');
+const { pedersenHash } = require('../dist/cjs/perpetual/crypto/signer');
 
 describe('Pedersen hash', () => {
   it('produces correct hash for known inputs', async () => {

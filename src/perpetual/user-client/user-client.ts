@@ -10,7 +10,6 @@ import { getUrl, sendGetRequest, sendPostRequest, sendDeleteRequest } from '../.
 import { utcNow } from '../../utils/date.js';
 import {
   OnBoardedAccount,
-  StarkKeyPair,
   getL2KeysFromL1Account,
   getOnboardingPayload,
   getSubAccountCreationPayload,
@@ -46,7 +45,6 @@ export class UserClient {
    * Onboard new account
    */
   async onboard(referralCode?: string): Promise<OnBoardedAccount> {
-    const wallet = new ethers.Wallet(this.l1PrivateKey());
     const keyPair = await getL2KeysFromL1Account(
       this.l1PrivateKey(),
       0,

@@ -16,7 +16,6 @@ import {
   OrderType,
   NewOrderModel,
   CreateOrderTpslTriggerModel,
-  StarkSettlementModel,
 } from './orders.js';
 import {
   OrderSettlementData,

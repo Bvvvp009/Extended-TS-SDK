@@ -46,7 +46,7 @@ export class Asset {
    */
   convertHumanReadableToStarkQuantity(
     internal: Decimal,
-    roundingContext: Decimal.Constructor
+    _roundingContext: Decimal.Constructor
   ): number {
     const result = internal.mul(this.settlementResolution);
     // Round according to context

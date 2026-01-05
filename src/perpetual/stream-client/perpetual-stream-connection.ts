@@ -2,7 +2,7 @@
  * Perpetual stream connection for WebSocket streaming
  */
 
-import WebSocket from 'ws';
+import WebSocket, { WebSocket as WebSocketNamespace } from '../../utils/websocket.js';
 import { USER_AGENT } from '../../config.js';
 import { RequestHeader } from '../../utils/http.js';
 import { WrappedStreamResponse } from '../../utils/http.js';
@@ -103,7 +103,7 @@ export class PerpetualStreamConnection<T> {
     }
 
     return new Promise((resolve, reject) => {
-      const messageHandler = (data: WebSocket.Data) => {
+      const messageHandler = (data: WebSocketNamespace.Data) => {
         this.msgsCount++;
         try {
           const parsed = JSON.parse(data.toString());

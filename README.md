@@ -4,6 +4,30 @@ This is a community-maintained TypeScript SDK for Extended Exchange. It is not o
 
 TypeScript client for [Extended Exchange API](https://api.docs.extended.exchange/).
 
+## ✅ Works in Both Node.js and Browser
+
+This SDK is **production-ready** for both backend and frontend applications:
+
+- ✅ **Node.js** (v18+) - Works immediately, no configuration needed
+- ✅ **Browser** (Chrome, Firefox, Safari, Edge) - Requires one-time bundler config
+- ✅ **All Modern Bundlers** (Vite, Webpack, Rollup, Next.js, Parcel)
+- ✅ **Dual Package** - Ships ESM + CommonJS for maximum compatibility
+- ✅ **WASM Crypto** - Pre-built for both Node.js and browser (no Rust needed)
+
+### Package Structure
+
+```
+extended-typescript-sdk/
+├── dist/
+│   ├── esm/          # ES Modules (import)
+│   └── cjs/          # CommonJS (require)
+└── wasm/
+    ├── stark_crypto_wasm.js             # Node.js WASM
+    ├── stark_crypto_wasm_bg.wasm        # Node.js binary
+    ├── stark_crypto_wasm-web.js         # Browser WASM
+    └── stark_crypto_wasm_bg-web.wasm    # Browser binary
+```
+
 ## About Extended Exchange
 
 Extended is a perpetual DEX (Decentralized Exchange), built by an ex-Revolut team. As of now, Extended offers perpetual contracts on both crypto and TradFi assets, with USDC as collateral and leverage of up to 100x.
@@ -16,6 +40,35 @@ This SDK provides full type safety and modern async/await patterns for interacti
 npm install extended-typescript-sdk
 ```
 
+### Node.js Setup (Backend)
+
+✅ **No configuration needed!** Just install and use:
+
+```typescript
+import { initWasm, TESTNET_CONFIG } from 'extended-typescript-sdk';
+
+await initWasm(); // Automatically loads Node.js WASM
+// Ready to trade!
+```
+
+### Browser Setup (Frontend)
+
+1. **Install the SDK:**
+   ```bash
+   npm install extended-typescript-sdk
+   ```
+
+2. **Configure your bundler** (one-time setup):
+   - See bundler configuration below for Vite, Webpack, Next.js, etc.
+
+3. **Use in your app:**
+   ```typescript
+   import { initWasm, TESTNET_CONFIG } from 'extended-typescript-sdk';
+   
+   await initWasm(); // Automatically loads browser WASM
+   // Ready to trade!
+   ```
+
 **✅ Node.js Backend:** Works immediately - no configuration needed!
 
 **⚙️ Browser/Frontend:** Requires one-time bundler configuration (see below)
@@ -24,17 +77,35 @@ npm install extended-typescript-sdk
 
 ### Browser Bundler Setup
 
-This SDK uses WebAssembly for cryptographic operations. Bundlers need configuration to handle WASM files.
+This SDK uses WebAssembly for cryptographic operations. Modern bundlers need minimal configuration to handle WASM files.
+
+#### Quick Setup by Bundler
 
 <details>
-<summary><b>Vite Configuration</b></summary>
+<summary><b>✅ Vite (Recommended)</b></summary>
 
-**Install the plugin:**
+Vite has excellent WASM support. Add this to `vite.config.ts`:
+
+```typescript
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  optimizeDeps: {
+    exclude: ['extended-typescript-sdk']
+  },
+  assetsInclude: ['**/*.wasm'],
+  build: {
+    target: 'esnext'
+  }
+});
+```
+
+**Optional: Copy WASM files to dist** (for production deployments):
+
 ```bash
 npm install --save-dev vite-plugin-static-copy
 ```
 
-**Configure `vite.config.ts`:**
 ```typescript
 import { defineConfig } from 'vite';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
@@ -50,26 +121,19 @@ export default defineConfig({
   ],
   optimizeDeps: {
     exclude: ['extended-typescript-sdk']
-  },
-  build: {
-    rollupOptions: {
-      external: [/\.wasm$/, /extended-typescript-sdk\/wasm\//, /^\/wasm\//]
-    }
   }
 });
 ```
 
-**What this does:**
-- ✅ Copies WASM files to `dist/wasm/` during build
-- ✅ Prevents Rollup from trying to bundle WASM binaries
-- ✅ Works in both dev and production modes
+✅ See [vite.config.example.ts](./vite.config.example.ts) for a complete example
 
 </details>
 
 <details>
-<summary><b>Webpack Configuration</b></summary>
+<summary><b>Webpack 5+</b></summary>
 
-**Add to `webpack.config.js`:**
+Enable async WebAssembly in `webpack.config.js`:
+
 ```javascript
 module.exports = {
   experiments: {
@@ -84,6 +148,28 @@ module.exports = {
     ],
   },
 };
+```
+
+</details>
+
+<details>
+<summary><b>Next.js</b></summary>
+
+Add to `next.config.js`:
+
+```javascript
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  webpack: (config) => {
+    config.experiments = {
+      ...config.experiments,
+      asyncWebAssembly: true,
+    };
+    return config;
+  },
+};
+
+module.exports = nextConfig;
 ```
 
 </details>
@@ -114,10 +200,64 @@ export default {
 
 ---
 
+### Troubleshooting Bundler Issues
+
+**Problem: `Cannot find module 'extended-typescript-sdk/wasm/...'`**
+
+Solution: Add to bundler config:
+```typescript
+optimizeDeps: {
+  exclude: ['extended-typescript-sdk']
+}
+```
+
+**Problem: WASM loading fails in production**
+
+Solution: Ensure WASM files are copied to your dist folder. Use `vite-plugin-static-copy` (Vite) or `copy-webpack-plugin` (Webpack).
+
+**Problem: `WebAssembly module is included in initial chunk`**
+
+Solution: Configure code splitting or external WASM:
+```typescript
+build: {
+  rollupOptions: {
+    external: [/\.wasm$/]
+  }
+}
+```
+
+**Problem: Works in dev but not production**
+
+Solution: Check that WASM files are included in your production build:
+- Vite: Check `dist/wasm/` folder
+- Webpack: Verify WASM files in output bundle
+- Next.js: Check `.next/static/` or public folder
+
+📖 **For detailed troubleshooting**, see [ENVIRONMENT_SUPPORT.md](./ENVIRONMENT_SUPPORT.md)
+
+---
+
 ## Prerequisites
 
 - Node.js 18+ or TypeScript 5.3+
-- **No Rust required** - The SDK ships with pre-built WASM signer
+- **No Rust required** - The SDK ships with pre-built WASM for both Node.js and browser
+
+## Environment Testing
+
+The SDK includes comprehensive tests for both environments:
+
+```bash
+# Test Node.js CommonJS and ESM compatibility
+npm run test:cjs-esm
+
+# Test browser bundler compatibility (Vite)
+npm run test:vite
+
+# Test all compatibility scenarios
+npm run test:compat
+```
+
+All tests pass in both Node.js and browser environments, confirming dual-environment support.
 
 ## Quick Start
 
