@@ -13,8 +13,31 @@ imports['./stark_crypto_wasm_bg.js'] = new Proxy({}, {
   }
 });
 
-let cachedUint8ArrayMemory0 = null;
+function getArrayJsValueFromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    const mem = getDataViewMemory0();
+    const result = [];
+    for (let i = ptr; i < ptr + 4 * len; i += 4) {
+        result.push(wasm.__wbindgen_externrefs.get(mem.getUint32(i, true)));
+    }
+    wasm.__externref_drop_slice(ptr, len);
+    return result;
+}
 
+let cachedDataViewMemory0 = null;
+function getDataViewMemory0() {
+    if (cachedDataViewMemory0 === null || cachedDataViewMemory0.buffer.detached === true || (cachedDataViewMemory0.buffer.detached === undefined && cachedDataViewMemory0.buffer !== wasm.memory.buffer)) {
+        cachedDataViewMemory0 = new DataView(wasm.memory.buffer);
+    }
+    return cachedDataViewMemory0;
+}
+
+function getStringFromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return decodeText(ptr, len);
+}
+
+let cachedUint8ArrayMemory0 = null;
 function getUint8ArrayMemory0() {
     if (cachedUint8ArrayMemory0 === null || cachedUint8ArrayMemory0.byteLength === 0) {
         cachedUint8ArrayMemory0 = new Uint8Array(wasm.memory.buffer);
@@ -22,42 +45,7 @@ function getUint8ArrayMemory0() {
     return cachedUint8ArrayMemory0;
 }
 
-let cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
-
-cachedTextDecoder.decode();
-
-function decodeText(ptr, len) {
-    return cachedTextDecoder.decode(getUint8ArrayMemory0().subarray(ptr, ptr + len));
-}
-
-function getStringFromWasm0(ptr, len) {
-    ptr = ptr >>> 0;
-    return decodeText(ptr, len);
-}
-/**
- * Initialize the WASM module
- */
-exports.init = function() {
-    wasm.main();
-};
-
-let WASM_VECTOR_LEN = 0;
-
-const cachedTextEncoder = new TextEncoder();
-
-if (!('encodeInto' in cachedTextEncoder)) {
-    cachedTextEncoder.encodeInto = function (arg, view) {
-        const buf = cachedTextEncoder.encode(arg);
-        view.set(buf);
-        return {
-            read: arg.length,
-            written: buf.length
-        };
-    }
-}
-
 function passStringToWasm0(arg, malloc, realloc) {
-
     if (realloc === undefined) {
         const buf = cachedTextEncoder.encode(arg);
         const ptr = malloc(buf.length, 1) >>> 0;
@@ -78,7 +66,6 @@ function passStringToWasm0(arg, malloc, realloc) {
         if (code > 0x7F) break;
         mem[ptr + offset] = code;
     }
-
     if (offset !== len) {
         if (offset !== 0) {
             arg = arg.slice(offset);
@@ -95,78 +82,26 @@ function passStringToWasm0(arg, malloc, realloc) {
     return ptr;
 }
 
-let cachedDataViewMemory0 = null;
-
-function getDataViewMemory0() {
-    if (cachedDataViewMemory0 === null || cachedDataViewMemory0.buffer.detached === true || (cachedDataViewMemory0.buffer.detached === undefined && cachedDataViewMemory0.buffer !== wasm.memory.buffer)) {
-        cachedDataViewMemory0 = new DataView(wasm.memory.buffer);
-    }
-    return cachedDataViewMemory0;
+let cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
+cachedTextDecoder.decode();
+function decodeText(ptr, len) {
+    return cachedTextDecoder.decode(getUint8ArrayMemory0().subarray(ptr, ptr + len));
 }
 
-function getArrayJsValueFromWasm0(ptr, len) {
-    ptr = ptr >>> 0;
-    const mem = getDataViewMemory0();
-    const result = [];
-    for (let i = ptr; i < ptr + 4 * len; i += 4) {
-        result.push(wasm.__wbindgen_externrefs.get(mem.getUint32(i, true)));
-    }
-    wasm.__externref_drop_slice(ptr, len);
-    return result;
-}
-/**
- * Sign a message hash with a private key
- *
- * # Arguments
- * * `private_key` - Private key as hex string (e.g., "0x123...")
- * * `msg_hash` - Message hash as hex string (e.g., "0x456...")
- *
- * # Returns
- * Array of two hex strings: [r, s]
- * @param {string} private_key
- * @param {string} msg_hash
- * @returns {string[]}
- */
-exports.sign = function(private_key, msg_hash) {
-    const ptr0 = passStringToWasm0(private_key, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    const len0 = WASM_VECTOR_LEN;
-    const ptr1 = passStringToWasm0(msg_hash, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-    const len1 = WASM_VECTOR_LEN;
-    const ret = wasm.sign(ptr0, len0, ptr1, len1);
-    var v3 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
-    wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
-    return v3;
-};
+const cachedTextEncoder = new TextEncoder();
 
-/**
- * Compute Pedersen hash of two field elements
- *
- * # Arguments
- * * `a` - First field element as hex string
- * * `b` - Second field element as hex string
- *
- * # Returns
- * Hash result as hex string
- * @param {string} a
- * @param {string} b
- * @returns {string}
- */
-exports.pedersen_hash = function(a, b) {
-    let deferred3_0;
-    let deferred3_1;
-    try {
-        const ptr0 = passStringToWasm0(a, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len0 = WASM_VECTOR_LEN;
-        const ptr1 = passStringToWasm0(b, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
-        const len1 = WASM_VECTOR_LEN;
-        const ret = wasm.pedersen_hash(ptr0, len0, ptr1, len1);
-        deferred3_0 = ret[0];
-        deferred3_1 = ret[1];
-        return getStringFromWasm0(ret[0], ret[1]);
-    } finally {
-        wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+if (!('encodeInto' in cachedTextEncoder)) {
+    cachedTextEncoder.encodeInto = function (arg, view) {
+        const buf = cachedTextEncoder.encode(arg);
+        view.set(buf);
+        return {
+            read: arg.length,
+            written: buf.length
+        };
     }
-};
+}
+
+let WASM_VECTOR_LEN = 0;
 
 /**
  * Generate Stark keypair from Ethereum signature
@@ -182,14 +117,15 @@ exports.pedersen_hash = function(a, b) {
  * @param {string} eth_signature
  * @returns {string[]}
  */
-exports.generate_keypair_from_eth_signature = function(eth_signature) {
+function generate_keypair_from_eth_signature(eth_signature) {
     const ptr0 = passStringToWasm0(eth_signature, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
     const len0 = WASM_VECTOR_LEN;
     const ret = wasm.generate_keypair_from_eth_signature(ptr0, len0);
     var v2 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
     wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
     return v2;
-};
+}
+exports.generate_keypair_from_eth_signature = generate_keypair_from_eth_signature;
 
 /**
  * Get order message hash
@@ -212,7 +148,7 @@ exports.generate_keypair_from_eth_signature = function(eth_signature) {
  * @param {string} domain_revision
  * @returns {string}
  */
-exports.get_order_msg_hash = function(position_id, base_asset_id, base_amount, quote_asset_id, quote_amount, fee_amount, fee_asset_id, expiration, salt, user_public_key, domain_name, domain_version, domain_chain_id, domain_revision) {
+function get_order_msg_hash(position_id, base_asset_id, base_amount, quote_asset_id, quote_amount, fee_amount, fee_asset_id, expiration, salt, user_public_key, domain_name, domain_version, domain_chain_id, domain_revision) {
     let deferred12_0;
     let deferred12_1;
     try {
@@ -245,7 +181,8 @@ exports.get_order_msg_hash = function(position_id, base_asset_id, base_amount, q
     } finally {
         wasm.__wbindgen_free(deferred12_0, deferred12_1, 1);
     }
-};
+}
+exports.get_order_msg_hash = get_order_msg_hash;
 
 /**
  * Get transfer message hash
@@ -265,7 +202,7 @@ exports.get_order_msg_hash = function(position_id, base_asset_id, base_amount, q
  * @param {string} collateral_id
  * @returns {string}
  */
-exports.get_transfer_msg_hash = function(recipient_position_id, sender_position_id, amount, expiration, salt, user_public_key, domain_name, domain_version, domain_chain_id, domain_revision, collateral_id) {
+function get_transfer_msg_hash(recipient_position_id, sender_position_id, amount, expiration, salt, user_public_key, domain_name, domain_version, domain_chain_id, domain_revision, collateral_id) {
     let deferred9_0;
     let deferred9_1;
     try {
@@ -292,7 +229,8 @@ exports.get_transfer_msg_hash = function(recipient_position_id, sender_position_
     } finally {
         wasm.__wbindgen_free(deferred9_0, deferred9_1, 1);
     }
-};
+}
+exports.get_transfer_msg_hash = get_transfer_msg_hash;
 
 /**
  * Get withdrawal message hash
@@ -312,7 +250,7 @@ exports.get_transfer_msg_hash = function(recipient_position_id, sender_position_
  * @param {string} collateral_id
  * @returns {string}
  */
-exports.get_withdrawal_msg_hash = function(recipient_hex, position_id, amount, expiration, salt, user_public_key, domain_name, domain_version, domain_chain_id, domain_revision, collateral_id) {
+function get_withdrawal_msg_hash(recipient_hex, position_id, amount, expiration, salt, user_public_key, domain_name, domain_version, domain_chain_id, domain_revision, collateral_id) {
     let deferred10_0;
     let deferred10_1;
     try {
@@ -341,11 +279,77 @@ exports.get_withdrawal_msg_hash = function(recipient_hex, position_id, amount, e
     } finally {
         wasm.__wbindgen_free(deferred10_0, deferred10_1, 1);
     }
-};
+}
+exports.get_withdrawal_msg_hash = get_withdrawal_msg_hash;
 
-exports.main = function() {
+/**
+ * Initialize the WASM module
+ */
+function init() {
     wasm.main();
-};
+}
+exports.init = init;
+
+function main() {
+    wasm.main();
+}
+exports.main = main;
+
+/**
+ * Compute Pedersen hash of two field elements
+ *
+ * # Arguments
+ * * `a` - First field element as hex string
+ * * `b` - Second field element as hex string
+ *
+ * # Returns
+ * Hash result as hex string
+ * @param {string} a
+ * @param {string} b
+ * @returns {string}
+ */
+function pedersen_hash(a, b) {
+    let deferred3_0;
+    let deferred3_1;
+    try {
+        const ptr0 = passStringToWasm0(a, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(b, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+        const len1 = WASM_VECTOR_LEN;
+        const ret = wasm.pedersen_hash(ptr0, len0, ptr1, len1);
+        deferred3_0 = ret[0];
+        deferred3_1 = ret[1];
+        return getStringFromWasm0(ret[0], ret[1]);
+    } finally {
+        wasm.__wbindgen_free(deferred3_0, deferred3_1, 1);
+    }
+}
+exports.pedersen_hash = pedersen_hash;
+
+/**
+ * Sign a message hash with a private key
+ *
+ * # Arguments
+ * * `private_key` - Private key as hex string (e.g., "0x123...")
+ * * `msg_hash` - Message hash as hex string (e.g., "0x456...")
+ *
+ * # Returns
+ * Array of two hex strings: [r, s]
+ * @param {string} private_key
+ * @param {string} msg_hash
+ * @returns {string[]}
+ */
+function sign(private_key, msg_hash) {
+    const ptr0 = passStringToWasm0(private_key, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ptr1 = passStringToWasm0(msg_hash, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+    const len1 = WASM_VECTOR_LEN;
+    const ret = wasm.sign(ptr0, len0, ptr1, len1);
+    var v3 = getArrayJsValueFromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+    return v3;
+}
+exports.sign = sign;
 
 exports.__wbindgen_cast_2241b6af4c4b2941 = function(arg0, arg1) {
     // Cast intrinsic for `Ref(String) -> Externref`.
@@ -361,7 +365,6 @@ exports.__wbindgen_init_externref_table = function() {
     table.set(offset + 1, null);
     table.set(offset + 2, true);
     table.set(offset + 3, false);
-    ;
 };
 
 const wasmPath = `${__dirname}/stark_crypto_wasm_bg.wasm`;
@@ -370,4 +373,3 @@ const wasmModule = new WebAssembly.Module(wasmBytes);
 const wasm = exports.__wasm = new WebAssembly.Instance(wasmModule, imports).exports;
 
 wasm.__wbindgen_start();
-

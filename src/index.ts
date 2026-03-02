@@ -107,5 +107,5 @@ export {
 } from './perpetual/crypto/signer.js';
 
 // Version
-export const SDK_VERSION = '0.0.1';
+export const SDK_VERSION = '0.0.8';
 
