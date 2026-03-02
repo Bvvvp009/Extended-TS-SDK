@@ -117,9 +117,11 @@ export enum OrderPriceType {
  * Self trade protection level
  */
 export enum SelfTradeProtectionLevel {
-  NONE = 'NONE',
-  MARKET = 'MARKET',
+  DISABLED = 'DISABLED',
+  CLIENT = 'CLIENT',
   ACCOUNT = 'ACCOUNT',
+  NONE = 'DISABLED',
+  MARKET = 'CLIENT',
 }
 
 /**

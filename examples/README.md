@@ -70,6 +70,7 @@ npx ts-node --project tsconfig.examples.json examples/01_basic_order_env.ts
 - **06_twap.ts** - Time-Weighted Average Price (TWAP) order execution
 - **07_close_order.ts** - Cancel a specific order by ID
 - **13_modify_order.ts** - Modify order using cancel + replace pattern
+- **23_order_type_and_builder_env.ts** - Place order with explicit `OrderType` plus `builderId` / `builderFee`
 
 ### Position Management
 
@@ -91,6 +92,7 @@ npx ts-node --project tsconfig.examples.json examples/01_basic_order_env.ts
 ### Utilities
 
 - **_cancel_all_orders.ts** - Utility to cancel all open orders
+- **24_blocking_client_and_orderbook_env.ts** - Uses `BlockingTradingClient` + `OrderBook` for stream-confirmed place/cancel
 
 ## Using the SDK from npm
 

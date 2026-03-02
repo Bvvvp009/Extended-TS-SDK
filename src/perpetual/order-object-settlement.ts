@@ -41,6 +41,7 @@ export class SettlementDataCtx {
   market: MarketModel;
   fees: TradingFeeModel;
   builderFee?: Decimal;
+  builderId?: number;
   nonce: number;
   collateralPositionId: number;
   expireTime: Date;
@@ -57,11 +58,13 @@ export class SettlementDataCtx {
     signer: (msgHash: bigint) => Promise<[bigint, bigint]>,
     publicKey: bigint,
     starknetDomain: StarknetDomain,
-    builderFee?: Decimal
+    builderFee?: Decimal,
+    builderId?: number
   ) {
     this.market = market;
     this.fees = fees;
     this.builderFee = builderFee;
+    this.builderId = builderId;
     this.nonce = nonce;
     this.collateralPositionId = collateralPositionId;
     this.expireTime = expireTime;

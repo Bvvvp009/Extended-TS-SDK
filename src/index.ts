@@ -64,6 +64,10 @@ export { OnBoardedAccount, StarkKeyPair } from './perpetual/user-client/onboardi
 export { PerpetualStreamClient } from './perpetual/stream-client/stream-client';
 export { PerpetualStreamConnection } from './perpetual/stream-client/perpetual-stream-connection';
 
+// Simple Client Utilities
+export { BlockingTradingClient, TimedOpenOrderModel, TimedCancel } from './perpetual/simple-client/blocking-trading-client';
+export { OrderBook, OrderBookEntry, ImpactDetails } from './perpetual/orderbook';
+
 // Positions & Trades
 export { PositionModel, PositionHistoryModel, PositionSide, PositionStatus, ExitType } from './perpetual/positions';
 export { AccountTradeModel, PublicTradeModel, TradeType } from './perpetual/trades';

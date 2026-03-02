@@ -23,6 +23,7 @@ import {
   SettlementDataCtx,
   createOrderSettlementData,
 } from './order-object-settlement';
+import { DEFAULT_BUILDER_CODE_HEX } from './crypto/signer';
 import { generateNonce } from '../utils/nonce';
 import { utcNow, toEpochMillis } from '../utils/date';
 import { DEFAULT_FEES } from './fees';
@@ -54,6 +55,18 @@ export class OrderTpslTriggerParam {
  */
 function getOppositeSide(side: OrderSide): OrderSide {
   return side === OrderSide.BUY ? OrderSide.SELL : OrderSide.BUY;
+}
+
+function normalizeSelfTradeProtectionLevel(level: SelfTradeProtectionLevel): SelfTradeProtectionLevel {
+  if ((level as any) === 'NONE') {
+    return SelfTradeProtectionLevel.DISABLED;
+  }
+
+  if ((level as any) === 'MARKET') {
+    return SelfTradeProtectionLevel.CLIENT;
+  }
+
+  return level;
 }
 
 /**
@@ -146,6 +159,8 @@ export async function createOrderObject(
   }
 
   const finalNonce = nonce || generateNonce();
+  const finalBuilderId = builderId ?? Number(BigInt(DEFAULT_BUILDER_CODE_HEX));
+  const normalizedSelfTradeProtectionLevel = normalizeSelfTradeProtectionLevel(selfTradeProtectionLevel);
   const fees = (account.getTradingFee().get(market.name) as any) || DEFAULT_FEES;
   const feeRate = fees.takerFeeRate;
 
@@ -158,7 +173,8 @@ export async function createOrderObject(
     (msgHash: bigint) => account.sign(msgHash),
     account.getPublicKey(),
     starknetDomain,
-    builderFee
+    builderFee,
+    finalBuilderId
   );
 
   const settlementData = await createOrderSettlementData(
@@ -202,7 +218,7 @@ export async function createOrderObject(
     timeInForce,
     toEpochMillis(finalExpireTime),
     feeRate,
-    selfTradeProtectionLevel,
+    normalizedSelfTradeProtectionLevel,
     new Decimal(finalNonce),
     settlementData.settlement,
     settlementData.debuggingAmounts,
@@ -212,7 +228,7 @@ export async function createOrderObject(
     tpTriggerModel,
     slTriggerModel,
     builderFee,
-    builderId
+    finalBuilderId
   );
 
   return order;

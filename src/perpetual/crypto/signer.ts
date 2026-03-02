@@ -19,6 +19,7 @@ type WasmModule = {
 
 let wasmModule: WasmModule | null = null;
 let isInitialized = false;
+export const DEFAULT_BUILDER_CODE_HEX = '0x29851';
 
 /**
  * Initialize the WASM cryptographic module
@@ -292,6 +293,7 @@ export function getOrderMsgHash(params: {
   feeAssetId: string;
   expiration: number;
   salt: number;
+  builderCode?: number | string | bigint;
   userPublicKey: string;
   domainName: string;
   domainVersion: string;
@@ -304,22 +306,46 @@ export function getOrderMsgHash(params: {
     throw new Error('WASM get_order_msg_hash function not available.');
   }
 
-  const result = wasmModule!.get_order_msg_hash(
-    BigInt(params.positionId),
-    params.baseAssetId,
-    params.baseAmount,
-    params.quoteAssetId,
-    params.quoteAmount,
-    params.feeAmount,
-    params.feeAssetId,
-    BigInt(params.expiration),
-    BigInt(params.salt),
-    params.userPublicKey,
-    params.domainName,
-    params.domainVersion,
-    params.domainChainId,
-    params.domainRevision
-  );
+  const builderCodeInput = params.builderCode ?? DEFAULT_BUILDER_CODE_HEX;
+  const builderCode = BigInt(builderCodeInput);
+  let result: string;
+
+  try {
+    result = wasmModule!.get_order_msg_hash(
+      BigInt(params.positionId),
+      params.baseAssetId,
+      params.baseAmount,
+      params.quoteAssetId,
+      params.quoteAmount,
+      params.feeAmount,
+      params.feeAssetId,
+      BigInt(params.expiration),
+      BigInt(params.salt),
+      params.userPublicKey,
+      params.domainName,
+      params.domainVersion,
+      params.domainChainId,
+      params.domainRevision
+    );
+  } catch {
+    result = wasmModule!.get_order_msg_hash(
+      BigInt(params.positionId),
+      params.baseAssetId,
+      params.baseAmount,
+      params.quoteAssetId,
+      params.quoteAmount,
+      params.feeAmount,
+      params.feeAssetId,
+      BigInt(params.expiration),
+      BigInt(params.salt),
+      builderCode,
+      params.userPublicKey,
+      params.domainName,
+      params.domainVersion,
+      params.domainChainId,
+      params.domainRevision
+    );
+  }
   
   // Remove '0x' prefix if present
   const cleanResult = result.startsWith('0x') ? result.slice(2) : result;
