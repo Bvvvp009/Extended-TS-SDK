@@ -1,8 +1,8 @@
 import Decimal from 'decimal.js';
-import { EndpointConfig } from './configuration';
-import { OrderbookUpdateModel } from './orderbooks';
-import { PerpetualStreamClient } from './stream-client/stream-client';
-import { StreamDataType, WrappedStreamResponse } from '../utils/http';
+import { EndpointConfig } from './configuration.js';
+import { OrderbookUpdateModel } from './orderbooks.js';
+import { PerpetualStreamClient } from './stream-client/stream-client.js';
+import { StreamDataType, WrappedStreamResponse } from '../utils/http.js';
 
 export class OrderBookEntry {
   price: Decimal;
@@ -117,6 +117,7 @@ export class OrderBook {
           }
         }
       } catch {
+        continue;
       } finally {
         await stream.close();
       }

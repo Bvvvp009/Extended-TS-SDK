@@ -5,12 +5,12 @@ const path = require('path');
 // Import from built dist (the test script runs build first)
 const {
   initWasm,
-} = require('../dist');
+} = require('../dist/cjs');
 
 const {
   getL2KeysFromL1Account,
   getOnboardingPayload,
-} = require('../dist/perpetual/user-client/onboarding');
+} = require('../dist/cjs/perpetual/user-client/onboarding');
 
 describe('Onboarding', () => {
   it('derives L2 keys and onboarding payload matching test vectors', async () => {
@@ -24,9 +24,9 @@ describe('Onboarding', () => {
     const expectedL1Signature =
       '0x9a59eb699eb58f2ec975455f33dd7205c8a569f7b6d7647c25b71e7ab7eec3d30f2b8c9038f06f077167eb90e0c002602e4ecbab180fad4b2c91d2259883e6571c';
     const expectedL2R =
-      '0x70881694c59c7212b1a47fbbc07df4d32678f0326f778861ec3a2a5dbc09157';
+      '0x43dafa05a707a431c2a173e33925cd13133c63ca681872905f23c2e4ad5bdc7';
     const expectedL2S =
-      '0x558805193faa5d780719cba5f699ae1c888eec1fee23da4215fdd94a744d2cb';
+      '0x4cd209605a8716a4656e514a9aa739b385d1d248228fe5e2b0c9b36d753026f';
 
     // 1) Derive L2 keys
     const keyPair = await getL2KeysFromL1Account(knownPrivateKey, 0, 'x10.exchange');

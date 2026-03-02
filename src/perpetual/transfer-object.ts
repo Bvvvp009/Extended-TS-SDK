@@ -3,13 +3,13 @@
  */
 
 import Decimal from 'decimal.js';
-import { EndpointConfig, StarknetDomain } from './configuration';
-import { StarkPerpetualAccount } from './accounts';
-import { OnChainPerpetualTransferModel, StarkTransferSettlement } from './transfers';
-import { SettlementSignatureModel } from '../utils/model';
-import { getTransferMsgHash } from './crypto/signer';
-import { generateNonce } from '../utils/nonce';
-import { utcNow } from '../utils/date';
+import { EndpointConfig, StarknetDomain } from './configuration.js';
+import { StarkPerpetualAccount } from './accounts.js';
+import { OnChainPerpetualTransferModel, StarkTransferSettlement } from './transfers.js';
+import { SettlementSignatureModel } from '../utils/model.js';
+import { getTransferMsgHash } from './crypto/signer.js';
+import { generateNonce } from '../utils/nonce.js';
+import { utcNow } from '../utils/date.js';
 
 /**
  * Calculate expiration timestamp (21 days from now)

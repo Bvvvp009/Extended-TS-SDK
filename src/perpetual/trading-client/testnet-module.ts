@@ -2,10 +2,10 @@
  * Testnet module for trading client
  */
 
-import { BaseModule } from './base-module';
-import { AccountModule } from './account-module';
-import { WrappedApiResponse, sendPostRequest } from '../../utils/http';
-import { X10BaseModel } from '../../utils/model';
+import { BaseModule } from './base-module.js';
+import { AccountModule } from './account-module.js';
+import { WrappedApiResponse, sendPostRequest } from '../../utils/http.js';
+import { X10BaseModel } from '../../utils/model.js';
 
 /**
  * Claim response model

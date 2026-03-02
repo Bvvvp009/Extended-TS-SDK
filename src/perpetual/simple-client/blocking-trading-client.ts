@@ -1,13 +1,13 @@
 import Decimal from 'decimal.js';
-import { StarkPerpetualAccount } from '../accounts';
-import { EndpointConfig } from '../configuration';
-import { MarketModel } from '../markets';
-import { createOrderObject } from '../order-object';
-import { NewOrderModel, OpenOrderModel, OrderSide, OrderStatus, TimeInForce } from '../orders';
-import { PerpetualStreamClient } from '../stream-client/stream-client';
-import { WrappedStreamResponse } from '../../utils/http';
-import { MarketsInformationModule } from '../trading-client/markets-information-module';
-import { OrderManagementModule } from '../trading-client/order-management-module';
+import { StarkPerpetualAccount } from '../accounts.js';
+import { EndpointConfig } from '../configuration.js';
+import { MarketModel } from '../markets.js';
+import { createOrderObject } from '../order-object.js';
+import { NewOrderModel, OrderSide, OrderStatus, TimeInForce } from '../orders.js';
+import { PerpetualStreamClient } from '../stream-client/stream-client.js';
+import { WrappedStreamResponse } from '../../utils/http.js';
+import { MarketsInformationModule } from '../trading-client/markets-information-module.js';
+import { OrderManagementModule } from '../trading-client/order-management-module.js';
 
 type Resolver<T> = {
   resolve: (value: T) => void;
@@ -123,6 +123,7 @@ export class BlockingTradingClient {
           }
         }
       } catch {
+        continue;
       } finally {
         await stream.close();
       }

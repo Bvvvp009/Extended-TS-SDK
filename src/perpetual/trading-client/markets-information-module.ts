@@ -2,10 +2,10 @@
  * Markets information module for trading client
  */
 
-import { BaseModule } from './base-module';
-import { WrappedApiResponse, sendGetRequest } from '../../utils/http';
-import { MarketModel, MarketStatsModel } from '../markets';
-import { toEpochMillis } from '../../utils/date';
+import { BaseModule } from './base-module.js';
+import { WrappedApiResponse, sendGetRequest } from '../../utils/http.js';
+import { MarketModel, MarketStatsModel } from '../markets.js';
+import { toEpochMillis } from '../../utils/date.js';
 
 /**
  * Markets information module for market data

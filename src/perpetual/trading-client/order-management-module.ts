@@ -2,14 +2,14 @@
  * Order management module for trading client
  */
 
-import { BaseModule } from './base-module';
+import { BaseModule } from './base-module.js';
 import {
   WrappedApiResponse,
   sendPostRequest,
   sendDeleteRequest,
-} from '../../utils/http';
-import { EmptyModel, X10BaseModel } from '../../utils/model';
-import { NewOrderModel, PlacedOrderModel } from '../orders';
+} from '../../utils/http.js';
+import { EmptyModel, X10BaseModel } from '../../utils/model.js';
+import { NewOrderModel, PlacedOrderModel } from '../orders.js';
 
 /**
  * Mass cancel request model

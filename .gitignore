@@ -10,6 +10,10 @@ examples/*.js.map
 *.tsbuildinfo
 *.map
 
+#test
+tests/
+tests.*
+
 # Logs
 *.log
 npm-debug.log*

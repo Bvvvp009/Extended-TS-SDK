@@ -73,12 +73,10 @@ export function getEnvBooleanOptional(name: string, defaultValue?: boolean): boo
  */
 export function loadEnv(): void {
   try {
-    // Try to load dotenv if available
     const dotenv = require('dotenv');
     const path = require('path');
     const fs = require('fs');
     
-    // Try multiple paths
     const possiblePaths = [
       path.join(process.cwd(), '.env.local'),
       path.join(process.cwd(), '.env'),
@@ -90,7 +88,7 @@ export function loadEnv(): void {
       if (fs.existsSync(envPath)) {
         const result = dotenv.config({ path: envPath });
         if (!result.error) {
-          break; // Successfully loaded
+          break;
         }
       }
     }

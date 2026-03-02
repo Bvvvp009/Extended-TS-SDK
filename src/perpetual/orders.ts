@@ -3,7 +3,7 @@
  */
 
 import Decimal from 'decimal.js';
-import { X10BaseModel, SettlementSignatureModel } from '../utils/model';
+import { X10BaseModel, SettlementSignatureModel } from '../utils/model.js';
 
 /**
  * Time in force
@@ -120,8 +120,8 @@ export enum SelfTradeProtectionLevel {
   DISABLED = 'DISABLED',
   CLIENT = 'CLIENT',
   ACCOUNT = 'ACCOUNT',
-  NONE = 'DISABLED',
-  MARKET = 'CLIENT',
+  NONE = 'NONE',
+  MARKET = 'MARKET',
 }
 
 /**

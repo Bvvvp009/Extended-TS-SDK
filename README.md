@@ -1,8 +1,32 @@
-# Extended TypeScript Trading SDK
+# Extended TypeScript SDK
 
-**⚠️ Unofficial SDK**: This is an **unofficial TypeScript SDK** for Extended Exchange, built and maintained by the community. It is not officially supported by Extended.
+This is a community-maintained TypeScript SDK for Extended Exchange. It is not officially supported by Extended.
 
 TypeScript client for [Extended Exchange API](https://api.docs.extended.exchange/).
+
+## ✅ Works in Both Node.js and Browser
+
+This SDK is **production-ready** for both backend and frontend applications:
+
+- ✅ **Node.js** (v18+) - Works immediately, no configuration needed
+- ✅ **Browser** (Chrome, Firefox, Safari, Edge) - Requires one-time bundler config
+- ✅ **All Modern Bundlers** (Vite, Webpack, Rollup, Next.js, Parcel)
+- ✅ **Dual Package** - Ships ESM + CommonJS for maximum compatibility
+- ✅ **WASM Crypto** - Pre-built for both Node.js and browser (no Rust needed)
+
+### Package Structure
+
+```
+extended-typescript-sdk/
+├── dist/
+│   ├── esm/          # ES Modules (import)
+│   └── cjs/          # CommonJS (require)
+└── wasm/
+    ├── stark_crypto_wasm.js             # Node.js WASM
+    ├── stark_crypto_wasm_bg.wasm        # Node.js binary
+    ├── stark_crypto_wasm-web.js         # Browser WASM
+    └── stark_crypto_wasm_bg-web.wasm    # Browser binary
+```
 
 ## About Extended Exchange
 
@@ -16,10 +40,224 @@ This SDK provides full type safety and modern async/await patterns for interacti
 npm install extended-typescript-sdk
 ```
 
+### Node.js Setup (Backend)
+
+✅ **No configuration needed!** Just install and use:
+
+```typescript
+import { initWasm, TESTNET_CONFIG } from 'extended-typescript-sdk';
+
+await initWasm(); // Automatically loads Node.js WASM
+// Ready to trade!
+```
+
+### Browser Setup (Frontend)
+
+1. **Install the SDK:**
+   ```bash
+   npm install extended-typescript-sdk
+   ```
+
+2. **Configure your bundler** (one-time setup):
+   - See bundler configuration below for Vite, Webpack, Next.js, etc.
+
+3. **Use in your app:**
+   ```typescript
+   import { initWasm, TESTNET_CONFIG } from 'extended-typescript-sdk';
+   
+   await initWasm(); // Automatically loads browser WASM
+   // Ready to trade!
+   ```
+
+**✅ Node.js Backend:** Works immediately - no configuration needed!
+
+**⚙️ Browser/Frontend:** Requires one-time bundler configuration (see below)
+
+---
+
+### Browser Bundler Setup
+
+This SDK uses WebAssembly for cryptographic operations. Modern bundlers need minimal configuration to handle WASM files.
+
+#### Quick Setup by Bundler
+
+<details>
+<summary><b>✅ Vite (Recommended)</b></summary>
+
+Vite has excellent WASM support. Add this to `vite.config.ts`:
+
+```typescript
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  optimizeDeps: {
+    exclude: ['extended-typescript-sdk']
+  },
+  assetsInclude: ['**/*.wasm'],
+  build: {
+    target: 'esnext'
+  }
+});
+```
+
+**Optional: Copy WASM files to dist** (for production deployments):
+
+```bash
+npm install --save-dev vite-plugin-static-copy
+```
+
+```typescript
+import { defineConfig } from 'vite';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
+
+export default defineConfig({
+  plugins: [
+    viteStaticCopy({
+      targets: [{
+        src: 'node_modules/extended-typescript-sdk/wasm/*',
+        dest: 'wasm'
+      }]
+    })
+  ],
+  optimizeDeps: {
+    exclude: ['extended-typescript-sdk']
+  }
+});
+```
+
+✅ See [vite.config.example.ts](./vite.config.example.ts) for a complete example
+
+</details>
+
+<details>
+<summary><b>Webpack 5+</b></summary>
+
+Enable async WebAssembly in `webpack.config.js`:
+
+```javascript
+module.exports = {
+  experiments: {
+    asyncWebAssembly: true,
+  },
+  module: {
+    rules: [
+      {
+        test: /\.wasm$/,
+        type: 'webassembly/async',
+      },
+    ],
+  },
+};
+```
+
+</details>
+
+<details>
+<summary><b>Next.js</b></summary>
+
+Add to `next.config.js`:
+
+```javascript
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  webpack: (config) => {
+    config.experiments = {
+      ...config.experiments,
+      asyncWebAssembly: true,
+    };
+    return config;
+  },
+};
+
+module.exports = nextConfig;
+```
+
+</details>
+
+<details>
+<summary><b>Rollup Configuration</b></summary>
+
+**Install plugin:**
+```bash
+npm install --save-dev @rollup/plugin-wasm
+```
+
+**Configure `rollup.config.js`:**
+```javascript
+import wasm from '@rollup/plugin-wasm';
+
+export default {
+  plugins: [
+    wasm({
+      maxFileSize: 10000000, // 10MB
+      targetEnv: 'auto',
+    }),
+  ],
+};
+```
+
+</details>
+
+---
+
+### Troubleshooting Bundler Issues
+
+**Problem: `Cannot find module 'extended-typescript-sdk/wasm/...'`**
+
+Solution: Add to bundler config:
+```typescript
+optimizeDeps: {
+  exclude: ['extended-typescript-sdk']
+}
+```
+
+**Problem: WASM loading fails in production**
+
+Solution: Ensure WASM files are copied to your dist folder. Use `vite-plugin-static-copy` (Vite) or `copy-webpack-plugin` (Webpack).
+
+**Problem: `WebAssembly module is included in initial chunk`**
+
+Solution: Configure code splitting or external WASM:
+```typescript
+build: {
+  rollupOptions: {
+    external: [/\.wasm$/]
+  }
+}
+```
+
+**Problem: Works in dev but not production**
+
+Solution: Check that WASM files are included in your production build:
+- Vite: Check `dist/wasm/` folder
+- Webpack: Verify WASM files in output bundle
+- Next.js: Check `.next/static/` or public folder
+
+📖 **For detailed troubleshooting**, see [ENVIRONMENT_SUPPORT.md](./ENVIRONMENT_SUPPORT.md)
+
+---
+
 ## Prerequisites
 
 - Node.js 18+ or TypeScript 5.3+
-- **No Rust required** - The SDK ships with pre-built WASM signer
+- **No Rust required** - The SDK ships with pre-built WASM for both Node.js and browser
+
+## Environment Testing
+
+The SDK includes comprehensive tests for both environments:
+
+```bash
+# Test Node.js CommonJS and ESM compatibility
+npm run test:cjs-esm
+
+# Test browser bundler compatibility (Vite)
+npm run test:vite
+
+# Test all compatibility scenarios
+npm run test:compat
+```
+
+All tests pass in both Node.js and browser environments, confirming dual-environment support.
 
 ## Quick Start
 
@@ -181,6 +419,83 @@ for await (const update of accountStream) {
   console.log('Account update:', update);
 }
 ```
+
+## Bundler Configuration (Vite, Rollup, Webpack)
+
+If you're using **Vite, Rollup, Webpack, or Next.js**, you may encounter WASM-related build errors. Here's how to fix them:
+
+### Vite Configuration
+
+Add this to your `vite.config.js` or `vite.config.ts`:
+
+```javascript
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  optimizeDeps: {
+    exclude: ['extended-typescript-sdk']
+  },
+  assetsInclude: ['**/*.wasm'],
+});
+```
+
+### Common Build Error
+
+If you see this error:
+```
+Could not resolve "./stark_crypto_wasm_bg.js" from "node_modules/extended-typescript-sdk/wasm/..."
+```
+
+**Solution**: Add the SDK to the `exclude` list in your bundler configuration:
+
+```javascript
+// vite.config.js
+export default {
+  optimizeDeps: {
+    exclude: ['extended-typescript-sdk']
+  }
+}
+```
+
+### Other Bundlers
+
+#### Webpack 5
+```javascript
+module.exports = {
+  experiments: {
+    asyncWebAssembly: true,
+  },
+};
+```
+
+#### Next.js
+```javascript
+// next.config.js
+module.exports = {
+  webpack: (config) => {
+    config.experiments = {
+      ...config.experiments,
+      asyncWebAssembly: true,
+    };
+    return config;
+  },
+};
+```
+
+#### Rollup
+```bash
+npm install --save-dev @rollup/plugin-wasm
+```
+
+```javascript
+import wasm from '@rollup/plugin-wasm';
+
+export default {
+  plugins: [wasm({ targetEnv: 'auto' })],
+};
+```
+
+> 📖 **For detailed bundler configurations and troubleshooting**, see [BUNDLER_CONFIG.md](./BUNDLER_CONFIG.md)
 
 ## WASM Signer
 

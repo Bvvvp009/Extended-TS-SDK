@@ -3,8 +3,8 @@
  */
 
 import Decimal from 'decimal.js';
-import { X10BaseModel } from '../utils/model';
-import { Asset } from './assets';
+import { X10BaseModel } from '../utils/model.js';
+import { Asset } from './assets.js';
 
 /**
  * Risk factor config

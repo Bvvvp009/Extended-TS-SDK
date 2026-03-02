@@ -4,24 +4,24 @@
  */
 
 import Decimal from 'decimal.js';
-import { EndpointConfig } from '../configuration';
-import { StarkPerpetualAccount } from '../accounts';
-import { MarketModel } from '../markets';
+import { EndpointConfig } from '../configuration.js';
+import { StarkPerpetualAccount } from '../accounts.js';
+import { MarketModel } from '../markets.js';
 import {
   OrderSide,
   OrderTpslType,
   PlacedOrderModel,
   SelfTradeProtectionLevel,
   TimeInForce,
-} from '../orders';
-import { OrderTpslTriggerParam, createOrderObject } from '../order-object';
-import { WrappedApiResponse } from '../../utils/http';
-import { utcNow } from '../../utils/date';
-import { AccountModule } from './account-module';
-import { OrderManagementModule } from './order-management-module';
-import { MarketsInformationModule } from './markets-information-module';
-import { InfoModule } from './info-module';
-import { TestnetModule } from './testnet-module';
+} from '../orders.js';
+import { OrderTpslTriggerParam, createOrderObject } from '../order-object.js';
+import { WrappedApiResponse } from '../../utils/http.js';
+import { utcNow } from '../../utils/date.js';
+import { AccountModule } from './account-module.js';
+import { OrderManagementModule } from './order-management-module.js';
+import { MarketsInformationModule } from './markets-information-module.js';
+import { InfoModule } from './info-module.js';
+import { TestnetModule } from './testnet-module.js';
 
 /**
  * Perpetual Trading Client for X10 REST API v1

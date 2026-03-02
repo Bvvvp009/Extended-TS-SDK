@@ -3,7 +3,7 @@
  */
 
 import Decimal from 'decimal.js';
-import { X10BaseModel, HexValue } from '../utils/model';
+import { X10BaseModel, HexValue } from '../utils/model.js';
 
 /**
  * Asset model
@@ -46,7 +46,7 @@ export class Asset {
    */
   convertHumanReadableToStarkQuantity(
     internal: Decimal,
-    roundingContext: Decimal.Constructor
+    _roundingContext: Decimal.Constructor
   ): number {
     const result = internal.mul(this.settlementResolution);
     // Round according to context

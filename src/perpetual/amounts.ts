@@ -3,7 +3,7 @@
  */
 
 import Decimal from 'decimal.js';
-import { Asset } from './assets';
+import { Asset } from './assets.js';
 
 /**
  * Rounding contexts
@@ -29,7 +29,7 @@ export class HumanReadableAmount {
     return new L1Amount(convertedValue, this.asset);
   }
 
-  toStarkAmount(roundingMode: Decimal.Rounding = ROUNDING_BUY_CONTEXT): StarkAmount {
+  toStarkAmount(_roundingMode: Decimal.Rounding = ROUNDING_BUY_CONTEXT): StarkAmount {
 		if (!(this as any).asset) {
 			throw new Error(`HumanReadableAmount.asset is undefined. value=${String(this.value)}`);
 		}
