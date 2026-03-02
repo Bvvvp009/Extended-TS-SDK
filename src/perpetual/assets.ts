@@ -46,11 +46,10 @@ export class Asset {
    */
   convertHumanReadableToStarkQuantity(
     internal: Decimal,
-    _roundingContext: Decimal.Constructor
+    roundingContext: Decimal.Rounding
   ): number {
     const result = internal.mul(this.settlementResolution);
-    // Round according to context
-    return Math.round(result.toNumber());
+    return result.toDecimalPlaces(0, roundingContext).toNumber();
   }
 
   /**

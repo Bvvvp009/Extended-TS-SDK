@@ -3,7 +3,7 @@
  */
 
 export const DEFAULT_REQUEST_TIMEOUT_SECONDS = 500;
-export const SDK_VERSION = '0.0.8';
+export const SDK_VERSION = '0.8.1';
 export const USER_AGENT = `X10TypeScriptTradingClient/${SDK_VERSION}`;
 
 // Market constants

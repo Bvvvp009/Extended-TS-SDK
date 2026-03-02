@@ -1,6 +1,6 @@
 {
   "name": "extended-typescript-sdk",
-  "version": "0.0.8",
+  "version": "0.8.1",
   "description": "Community-maintained TypeScript SDK for Extended Exchange - A perpetual DEX built by ex-Revolut team",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",

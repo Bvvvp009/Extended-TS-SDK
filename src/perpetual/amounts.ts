@@ -30,17 +30,11 @@ export class HumanReadableAmount {
   }
 
   toStarkAmount(_roundingMode: Decimal.Rounding = ROUNDING_BUY_CONTEXT): StarkAmount {
-		if (!(this as any).asset) {
-			throw new Error(`HumanReadableAmount.asset is undefined. value=${String(this.value)}`);
-		}
-		const convertedValue = (this as any).asset.convertHumanReadableToStarkQuantity(
+    const convertedValue = this.asset.convertHumanReadableToStarkQuantity(
       this.value,
-      Decimal as any // Type workaround
+      _roundingMode
     );
-		if (convertedValue === undefined) {
-			throw new Error('Asset conversion failed: asset or conversion method undefined');
-		}
-		return new StarkAmount(convertedValue, this.asset);
+    return new StarkAmount(convertedValue, this.asset);
   }
 }
 
