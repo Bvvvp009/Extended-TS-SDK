@@ -13,13 +13,13 @@ import {
   MAINNET_CONFIG,
   OrderBook,
   OrderSide,
-  StarkPerpetualAccount,
+  PerpetualTradingClient,
   TESTNET_CONFIG,
   BlockingTradingClient,
   TimeInForce,
   initWasm,
 } from '../src';
-import { getX10EnvConfig } from '../src/utils/env';
+import { createStableAccountFromEnv, findAffordableMarketOrder } from './_shared_stable_account';
 
 function extractExternalId(order: any): string | undefined {
   return order?.externalId ?? order?.external_id;
@@ -35,14 +35,18 @@ function roundToStep(value: Decimal, stepValue: Decimal): Decimal {
 
 async function main() {
   await initWasm();
-  const env = getX10EnvConfig(true);
-  const config: EndpointConfig = env.environment === 'mainnet' ? MAINNET_CONFIG : TESTNET_CONFIG;
+  const { env, config, account } = createStableAccountFromEnv(true);
+  const stableConfig: EndpointConfig = config;
+  const blockingClient = await BlockingTradingClient.create(stableConfig, account);
 
-  const account = new StarkPerpetualAccount(env.vaultId, env.privateKey, env.publicKey, env.apiKey);
-  const blockingClient = await BlockingTradingClient.create(config, account);
+  const seedClient = new PerpetualTradingClient(stableConfig, account);
+  const affordableOrder = await findAffordableMarketOrder(seedClient, {
+    preferredMarkets: ['DOGE-USD', 'XRP-USD', 'ADA-USD', 'ETH-USD', 'BTC-USD'],
+  });
+  await seedClient.close();
 
-  const marketName = 'ETH-USD';
-  const orderBook = await OrderBook.create(config, marketName, { start: true, depth: 20 });
+  const marketName = affordableOrder.marketName;
+  const orderBook = await OrderBook.create(stableConfig, marketName, { start: true, depth: 20 });
 
   try {
     await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -58,7 +62,7 @@ async function main() {
       throw new Error(`Market ${marketName} not found`);
     }
 
-    const amount = new Decimal((market as any).tradingConfig?.minOrderSize ?? '0.01');
+    const amount = affordableOrder.quantity;
     const basePrice = bestBid?.price ? new Decimal(bestBid.price) : new Decimal(market.marketStats.bidPrice);
     const priceStep = new Decimal((market as any).tradingConfig?.minPriceChange ?? '0.1');
     const orderPrice = roundToStep(basePrice.mul(new Decimal('0.9')), priceStep);

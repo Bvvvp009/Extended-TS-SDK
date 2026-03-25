@@ -5,6 +5,10 @@
 const {
   CustomStarkSigner,
   isCustomStarkSigner,
+  CallbackStarkSigner,
+  createCustomStarkSigner,
+  createOfficialWrapperStarkSigner,
+  normalizeSignatureResult,
   createStarkPerpetualAccountWithCustomSigner,
   StarkPerpetualAccount,
 } = require('../dist/cjs/index');
@@ -31,6 +35,60 @@ describe('Custom Signer', () => {
 
     it('should return false for undefined', () => {
       expect(isCustomStarkSigner(undefined)).toBe(false);
+    });
+  });
+
+  describe('normalizeSignatureResult', () => {
+    it('normalizes bigint tuple signatures', () => {
+      expect(normalizeSignatureResult([BigInt(1), BigInt(2)])).toEqual([BigInt(1), BigInt(2)]);
+    });
+
+    it('normalizes hex object signatures', () => {
+      expect(normalizeSignatureResult({ r: '0x10', s: '0x20' })).toEqual([BigInt(16), BigInt(32)]);
+    });
+
+    it('normalizes decimal string tuple signatures', () => {
+      expect(normalizeSignatureResult(['123', '456'])).toEqual([BigInt(123), BigInt(456)]);
+    });
+
+    it('throws for malformed signatures', () => {
+      expect(() => normalizeSignatureResult(['0x1'])).toThrow(
+        'Invalid signature result: expected [r, s] tuple'
+      );
+    });
+  });
+
+  describe('CallbackStarkSigner', () => {
+    it('normalizes callback results returned as objects', async () => {
+      const signer = new CallbackStarkSigner(async () => ({ r: '0x12', s: '34' }));
+      await expect(signer.sign(BigInt(1))).resolves.toEqual([BigInt(18), BigInt(34)]);
+    });
+
+    it('createCustomStarkSigner wraps callbacks', async () => {
+      const signer = createCustomStarkSigner(async () => ['0x55', '0x66']);
+      await expect(signer.sign(BigInt(2))).resolves.toEqual([BigInt(85), BigInt(102)]);
+    });
+  });
+
+  describe('createOfficialWrapperStarkSigner', () => {
+    it('wraps official wrapper sign_message getters', async () => {
+      const signer = createOfficialWrapperStarkSigner(
+        {
+          sign_message: jest.fn(() => ({
+            r: () => '0x123',
+            s: () => '456',
+          })),
+        },
+        '0xabc'
+      );
+
+      await expect(signer.sign(BigInt(7))).resolves.toEqual([BigInt(0x123), BigInt(456)]);
+    });
+
+    it('throws for invalid official wrapper modules', () => {
+      expect(() => createOfficialWrapperStarkSigner({}, '0xabc')).toThrow(
+        'Invalid official wrapper module: expected sign_message(privateKeyHex, messageHex)'
+      );
     });
   });
 
@@ -90,6 +148,19 @@ describe('Custom Signer', () => {
 
       account.clearCustomSigner();
       expect(account.getCustomSigner()).toBeUndefined();
+    });
+
+    it('should reject trading signatures without a custom signer', async () => {
+      const account = new StarkPerpetualAccount(
+        testVault,
+        testPrivateKey,
+        testPublicKey,
+        testApiKey
+      );
+
+      await expect(account.sign(BigInt(1))).rejects.toThrow(
+        'Trading signatures require a stable custom signer.'
+      );
     });
 
     it('should use custom signer for signing', async () => {
@@ -158,6 +229,36 @@ describe('Custom Signer', () => {
 
       expect(customSigner.sign).toHaveBeenCalledWith(testMsgHash);
       expect(result).toEqual([mockR, mockS]);
+    });
+
+    it('should reject signing after clearing the custom signer', async () => {
+      const customSigner = {
+        sign: jest.fn(async () => [BigInt(1), BigInt(2)]),
+      };
+
+      const account = createStarkPerpetualAccountWithCustomSigner(
+        testVault,
+        testPublicKey,
+        testApiKey,
+        customSigner
+      );
+
+      account.clearCustomSigner();
+
+      await expect(account.sign(BigInt(3))).rejects.toThrow(
+        'Trading signatures require a stable custom signer.'
+      );
+    });
+
+    it('should work with callback-based signer helper', async () => {
+      const account = createStarkPerpetualAccountWithCustomSigner(
+        testVault,
+        testPublicKey,
+        testApiKey,
+        createCustomStarkSigner(async (msgHash) => ({ r: '0x123', s: msgHash.toString() }))
+      );
+
+      await expect(account.sign(BigInt(7))).resolves.toEqual([BigInt(0x123), BigInt(7)]);
     });
   });
 });

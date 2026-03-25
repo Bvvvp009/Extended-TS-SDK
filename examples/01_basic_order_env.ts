@@ -4,13 +4,10 @@
 
 import {
   initWasm,
-  TESTNET_CONFIG,
-  MAINNET_CONFIG,
-  StarkPerpetualAccount,
   PerpetualTradingClient,
   OrderSide,
 } from '../src/index';
-import { getX10EnvConfig } from '../src/utils/env';
+import { createStableAccountFromEnv, findAffordableMarketOrder } from './_shared_stable_account';
 import Decimal from 'decimal.js';
 
 async function main() {
@@ -18,17 +15,9 @@ async function main() {
   await initWasm();
   console.log('WASM initialized!');
 
-  // Load environment configuration
-  const env = getX10EnvConfig(true);
-  const config = env.environment === 'mainnet' ? MAINNET_CONFIG : TESTNET_CONFIG;
+  const { config, account } = createStableAccountFromEnv(true);
 
-  console.log('Creating account...');
-  const account = new StarkPerpetualAccount(
-    env.vaultId,
-    env.privateKey,
-    env.publicKey,
-    env.apiKey
-  );
+  console.log('Creating stable account...');
 
   console.log('Creating trading client...');
   const client = new PerpetualTradingClient(config, account);
@@ -62,15 +51,16 @@ async function main() {
       console.log('Available markets count:', marketsResponse.data.length);
     }
 
+    const affordableOrder = await findAffordableMarketOrder(client);
+
     // Place a test order (small amount)
     console.log('\nPlacing test order...');
     const order = await client.placeOrder({
-      marketName: 'BTC-USD',
-      amountOfSynthetic: new Decimal('0.001'),
-      price: new Decimal('60000'),
+      marketName: affordableOrder.marketName,
+      amountOfSynthetic: affordableOrder.quantity,
+      price: affordableOrder.postOnlyPrice,
       side: OrderSide.BUY,
-      // Optional safety on mainnet: uncomment to avoid taking liquidity
-      // postOnly: true,
+      postOnly: true,
     });
 
     if (order.data) {

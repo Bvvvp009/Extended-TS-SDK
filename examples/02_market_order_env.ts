@@ -5,43 +5,25 @@
 
 import {
   initWasm,
-  TESTNET_CONFIG,
-  MAINNET_CONFIG,
   PerpetualTradingClient,
   OrderSide,
   TimeInForce,
 } from '../src/index';
-import { getX10EnvConfig } from '../src/utils/env';
+import { createStableAccountFromEnv, findAffordableMarketOrder } from './_shared_stable_account';
 import Decimal from 'decimal.js';
 
 async function main() {
   console.log('Initializing WASM...');
   await initWasm();
 
-  const env = getX10EnvConfig(true);
-  const config = env.environment === 'mainnet' ? MAINNET_CONFIG : TESTNET_CONFIG;
-
-  const { StarkPerpetualAccount } = await import('../src/index');
-  const account = new StarkPerpetualAccount(env.vaultId, env.privateKey, env.publicKey, env.apiKey);
+  const { config, account } = createStableAccountFromEnv(true);
   const client = new PerpetualTradingClient(config, account);
 
   try {
-    const marketName = 'BTC-USD';
-    
-    // Get current market price for reference
-    let referencePrice = new Decimal('60000'); // Fallback
-    try {
-      const orderbook = await client.marketsInfo.getOrderbookSnapshot(marketName);
-      if (orderbook.data) {
-        if (orderbook.data.asks && orderbook.data.asks.length > 0 && orderbook.data.asks[0].length > 0) {
-          referencePrice = new Decimal(orderbook.data.asks[0][0]); // Use best ask for buy orders
-        }
-      }
-    } catch (e) {
-      console.log('Could not fetch orderbook, using fallback price');
-    }
-
-    const qty = new Decimal('0.0001'); // Very small size to minimize cost
+    const affordableOrder = await findAffordableMarketOrder(client);
+    const marketName = affordableOrder.marketName;
+    const referencePrice = affordableOrder.referencePrice;
+    const qty = affordableOrder.quantity;
     console.log(`\nPlacing MARKET BUY order on ${marketName}...`);
     console.log(`Quantity: ${qty.toString()}, Reference price: ${referencePrice.toString()}`);
     console.log('Note: Market orders use IOC (Immediate or Cancel) time in force');

@@ -5,16 +5,14 @@
 import Decimal from 'decimal.js';
 import { X10BaseModel } from '../utils/model.js';
 import { isHexString } from '../utils/string.js';
-import { sign as wasmSign } from './crypto/signer.js';
 import { CustomStarkSigner, isCustomStarkSigner } from './custom-signer.js';
 
 /**
  * Stark Perpetual Account
  * Manages signing operations for trading
  * 
- * Supports two modes of operation:
- * 1. Direct signing with a private key (default)
- * 2. Custom signer integration (e.g., Privy, Web3Auth)
+ * Trading signatures require a custom signer integration
+ * (e.g. canonical Rust signer, Privy, Web3Auth, HSM).
  */
 export class StarkPerpetualAccount {
   private vault: number;
@@ -97,7 +95,8 @@ export class StarkPerpetualAccount {
   }
 
   /**
-   * Clear the custom signer and use direct signing
+   * Clear the custom signer.
+   * Trading signatures will fail until a new custom signer is configured.
    */
   clearCustomSigner(): void {
     this.customSigner = undefined;
@@ -107,8 +106,7 @@ export class StarkPerpetualAccount {
    * Sign a message hash
    * Returns Promise resolving to [r, s] tuple
    * 
-   * If a custom signer is set, uses the custom signer.
-   * Otherwise, uses the built-in WASM signer with the private key.
+   * Trading signatures only use the configured custom signer.
    * 
    * @returns Promise resolving to signature tuple [r, s]
    */
@@ -116,13 +114,10 @@ export class StarkPerpetualAccount {
     if (this.customSigner) {
       return this.customSigner.sign(msgHash);
     }
-    
-    if (!this.privateKey) {
-      throw new Error('No private key or custom signer available for signing');
-    }
-    
-    // Wrap synchronous WASM sign in Promise for consistent API
-    return Promise.resolve(wasmSign(this.privateKey, msgHash));
+
+    throw new Error(
+      'Trading signatures require a stable custom signer. Configure one with setCustomSigner() or createStarkPerpetualAccountWithCustomSigner().'
+    );
   }
 }
 

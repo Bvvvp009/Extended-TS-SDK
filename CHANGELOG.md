@@ -5,6 +5,29 @@ All notable changes to the Extended TypeScript SDK will be documented in this fi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-03-24
+
+### Added
+- Added stable custom signer helpers for live trading integrations:
+  - `createCustomStarkSigner`
+  - `CallbackStarkSigner`
+  - `createOfficialWrapperStarkSigner`
+  - `createStarkPerpetualAccountWithCustomSigner`
+- Added compatibility coverage for packaged CommonJS, ESM, and Vite consumers.
+
+### Changed
+- Live trading signatures now require an explicitly configured custom signer instead of falling back to the bundled WASM trading signer.
+- Browser WASM loading now uses package-relative imports with a runtime fallback so modern bundlers resolve the SDK consistently.
+- Example flows that place live orders now use the stable signer-backed account helper.
+
+### Removed
+- Removed raw root `sign` export from the supported package API.
+- Removed deep `./dist/esm/*` and `./dist/cjs/*` export-map escape hatches from the published package surface.
+
+### Validation
+- `npm test` passes.
+- `npm run lint` passes with warnings only.
+
 ## [0.8.1] - 2026-03-02
 
 ### Fixed

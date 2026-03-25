@@ -1,12 +1,10 @@
 /**
- * Simple TWAP executor with optional TP/SL (env-based)
+ * Client-side TWAP executor with optional TP/SL (env-based)
  * Note: native TWAP order type is not exposed; this script slices orders over time.
  */
 
 import {
   initWasm,
-  TESTNET_CONFIG,
-  MAINNET_CONFIG,
   PerpetualTradingClient,
   OrderSide,
   OrderTpslType,
@@ -14,33 +12,51 @@ import {
   OrderPriceType,
   TimeInForce,
 } from '../src/index';
-import { getX10EnvConfig } from '../src/utils/env';
+import {
+  createStableAccountFromEnv,
+  findAffordableMarketOrder,
+  getMarketPricePrecision,
+} from './_shared_stable_account';
 import Decimal from 'decimal.js';
 
 async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function getPositiveIntegerEnv(name: string, fallback: number): number {
+  const rawValue = process.env[name];
+  if (!rawValue) {
+    return fallback;
+  }
+
+  const parsedValue = Number.parseInt(rawValue, 10);
+  return Number.isFinite(parsedValue) && parsedValue > 0 ? parsedValue : fallback;
+}
+
 async function main() {
   console.log('Initializing WASM...');
   await initWasm();
 
-  const env = getX10EnvConfig(true);
-  const config = env.environment === 'mainnet' ? MAINNET_CONFIG : TESTNET_CONFIG;
-  const { StarkPerpetualAccount } = await import('../src/index');
-  const account = new StarkPerpetualAccount(env.vaultId, env.privateKey, env.publicKey, env.apiKey);
+  const { config, account } = createStableAccountFromEnv(true);
   const client = new PerpetualTradingClient(config, account);
 
   try {
-    const marketName = 'BTC-USD';
-    const totalQty = new Decimal('0.001'); // Single slice to fit balance
-    const slices = 1; // Single slice for demonstration
-    const delayMs = 2_000;
-    const sliceQty = totalQty;
-    const referencePrice = new Decimal('60000');
+    const affordableOrder = await findAffordableMarketOrder(client);
+    const marketName = affordableOrder.marketName;
+    const market = (await client.marketsInfo.getMarketsDict())[marketName];
+    const pricePrecision = getMarketPricePrecision(market);
+    const roundPrice = (price: Decimal, roundingMode: Decimal.Rounding = Decimal.ROUND_HALF_UP) =>
+      price.toDecimalPlaces(pricePrecision, roundingMode);
+    const slices = getPositiveIntegerEnv('TWAP_SLICES', 3);
+    const delayMs = getPositiveIntegerEnv('TWAP_DELAY_MS', 2_000);
+    const sliceQty = affordableOrder.quantity;
+    const totalQty = sliceQty.mul(slices);
+    const referencePrice = affordableOrder.postOnlyPrice;
+    const takeProfitPrice = roundPrice(referencePrice.mul(1.01), Decimal.ROUND_UP);
+    const stopLossPrice = roundPrice(referencePrice.mul(0.99), Decimal.ROUND_DOWN);
 
-    console.log(`\nExecuting TWAP: ${slices} slice(s) of ${sliceQty.toString()}...`);
-    console.log('Note: Full TWAP would place multiple slices over time. This demonstrates a single slice.');
+    console.log(`\nExecuting client-side TWAP on ${marketName}: ${slices} slice(s) of ${sliceQty.toString()} (total ${totalQty.toString()})...`);
+    console.log(`Each slice is posted as a limit child order, waits ${delayMs}ms, then is canceled before the next slice.`);
     const orderIds: number[] = [];
     for (let i = 0; i < slices; i++) {
       const res = await client.placeOrder({
@@ -52,15 +68,15 @@ async function main() {
         postOnly: true,
         tpSlType: OrderTpslType.ORDER,
         takeProfit: {
-          triggerPrice: referencePrice.mul(1.01),
+          triggerPrice: takeProfitPrice,
           triggerPriceType: OrderTriggerPriceType.MARK,
-          price: referencePrice.mul(1.01),
+          price: takeProfitPrice,
           priceType: OrderPriceType.LIMIT,
         },
         stopLoss: {
-          triggerPrice: referencePrice.mul(0.99),
+          triggerPrice: stopLossPrice,
           triggerPriceType: OrderTriggerPriceType.MARK,
-          price: referencePrice.mul(0.99),
+          price: stopLossPrice,
           priceType: OrderPriceType.LIMIT,
         },
       } as any);
@@ -68,16 +84,13 @@ async function main() {
         const orderId = typeof res.data.id === 'string' ? parseInt(res.data.id, 10) : res.data.id;
         orderIds.push(orderId);
         console.log(`Slice ${i + 1}/${slices} placed. ID: ${orderId}`);
-      }
-      if (i < slices - 1) {
+
         await sleep(delayMs);
+        await client.orders.cancelOrder(orderId);
+        console.log(`Slice ${i + 1}/${slices} canceled. ID: ${orderId}`);
       }
     }
-    // Cancel last order
-    if (orderIds.length > 0) {
-      await client.orders.cancelOrder(orderIds[orderIds.length - 1]);
-      console.log('TWAP order completed and canceled');
-    }
+    console.log(`TWAP schedule completed: ${orderIds.length} child limit order(s) placed and canceled.`);
   } finally {
     await client.close();
   }
