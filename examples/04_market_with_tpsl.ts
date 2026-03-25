@@ -4,8 +4,6 @@
 
 import {
   initWasm,
-  TESTNET_CONFIG,
-  MAINNET_CONFIG,
   PerpetualTradingClient,
   OrderSide,
   OrderTpslType,
@@ -13,19 +11,14 @@ import {
   OrderPriceType,
   TimeInForce,
 } from '../src/index';
-import { getX10EnvConfig } from '../src/utils/env';
+import { createStableAccountFromEnv } from './_shared_stable_account';
 import Decimal from 'decimal.js';
 
 async function main() {
   console.log('Initializing WASM...');
   await initWasm();
 
-  const env = getX10EnvConfig(true);
-  const config = env.environment === 'mainnet' ? MAINNET_CONFIG : TESTNET_CONFIG;
-
-  // Reuse the account builder from 01_basic_order_env.ts
-  const { StarkPerpetualAccount } = await import('../src/index');
-  const account = new StarkPerpetualAccount(env.vaultId, env.privateKey, env.publicKey, env.apiKey);
+  const { config, account } = createStableAccountFromEnv(true);
   const client = new PerpetualTradingClient(config, account);
 
   try {

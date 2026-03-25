@@ -33,7 +33,7 @@ async function main() {
     console.log('\nOnboarding account...');
     const account = await userClient.onboard();
     console.log('Account onboarded successfully!');
-    console.log('Account ID:', account.account.id);
+    console.log('Account ID:', account.account.accountId);
     console.log('Account Index:', account.account.accountIndex);
     console.log('Vault ID:', account.account.l2Vault);
 

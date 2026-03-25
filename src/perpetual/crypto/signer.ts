@@ -117,32 +117,25 @@ export async function initWasm(): Promise<void> {
     } else {
       try {
         // @ts-ignore
-        wasmModule = await import('extended-typescript-sdk/wasm/stark_crypto_wasm-web.js') as WasmModule;
+        wasmModule = await import('../../../../wasm/stark_crypto_wasm-web.js') as WasmModule;
         
         if (wasmModule.init) {
           await wasmModule.init();
         }
-      } catch (packageError: any) {
+      } catch (relativeError: any) {
         try {
+          const absoluteWasmPath = '/wasm/stark_crypto_wasm-web.js';
           // @ts-ignore
-          wasmModule = await import('/wasm/stark_crypto_wasm-web.js') as WasmModule;
+          wasmModule = await import(/* @vite-ignore */ absoluteWasmPath) as WasmModule;
           if (wasmModule.init) {
             await wasmModule.init();
           }
         } catch (absoluteError: any) {
-          try {
-            // @ts-ignore
-            wasmModule = await import('extended-typescript-sdk/wasm/stark_crypto_wasm-web') as WasmModule;
-            if (wasmModule.init) {
-              await wasmModule.init();
-            }
-          } catch (fallbackError: any) {
-            throw new Error(
-              `Failed to load WASM module in browser.\n` +
-              `Tried: extended-typescript-sdk/wasm/*, /wasm/*\n` +
-              `Errors: ${packageError.message}, ${absoluteError.message}`
-            );
-          }
+          throw new Error(
+            `Failed to load WASM module in browser.\n` +
+            `Tried: package-relative wasm path, /wasm/*\n` +
+            `Errors: ${relativeError.message}, ${absoluteError.message}`
+          );
         }
       }
     }

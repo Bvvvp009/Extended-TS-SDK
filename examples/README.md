@@ -139,23 +139,18 @@ async function main() {
 main().catch(console.error);
 ```
 
-### Standalone Signer Usage
+### Standalone Hashing Usage
 
-If you only need cryptographic signing functionality:
+If you only need cryptographic hashing helpers, the SDK still exports the WASM-backed hash functions.
+Trading signatures themselves should go through a stable custom signer such as `createOfficialWrapperStarkSigner()`.
 
 ```typescript
-import { initWasm, sign, getOrderMsgHash } from 'extended-typescript-sdk';
+import { initWasm, getOrderMsgHash, OrderSide } from 'extended-typescript-sdk';
+import Decimal from 'decimal.js';
 
 async function main() {
-  // Initialize WASM module
   await initWasm();
 
-  // Sign a message hash
-  const privateKey = BigInt('0x...');
-  const msgHash = BigInt('0x...');
-  const [r, s] = sign(privateKey, msgHash);
-
-  // Generate order message hash
   const orderHash = getOrderMsgHash({
     vaultId: 12345,
     marketName: 'BTC-USD',
@@ -164,10 +159,9 @@ async function main() {
     side: OrderSide.BUY,
     nonce: 123456,
     expireTime: Date.now() + 3600000,
-    // ... other parameters
   });
 
-  console.log('Order hash:', orderHash.toString(16));
+  console.log('Order hash:', '0x' + orderHash.toString(16));
 }
 
 main().catch(console.error);

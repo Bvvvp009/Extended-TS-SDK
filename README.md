@@ -270,6 +270,7 @@ import {
   initWasm,
   TESTNET_CONFIG,
   StarkPerpetualAccount,
+  createCustomStarkSigner,
   PerpetualTradingClient,
 } from 'extended-typescript-sdk';
 import Decimal from 'decimal.js';
@@ -281,10 +282,15 @@ await initWasm();
 // Create a Stark account
 const starkAccount = new StarkPerpetualAccount(
   vaultId,           // number
-  privateKey,        // Hex string (e.g., "0x123...")
+  privateKey,        // Retained for compatibility, but trading signatures use a custom signer
   publicKey,         // Hex string
   apiKey             // string
 );
+
+starkAccount.setCustomSigner(createCustomStarkSigner(async (msgHash) => {
+  const signature = await remoteSigner.sign('0x' + msgHash.toString(16));
+  return [signature.r, signature.s];
+}));
 
 // Create trading client
 const tradingClient = new PerpetualTradingClient(TESTNET_CONFIG, starkAccount);
@@ -328,7 +334,11 @@ console.log('Open orders:', openOrders.toPrettyJson());
 ### 4. Onboarding (User Client)
 
 ```typescript
-import { UserClient, TESTNET_CONFIG } from 'extended-typescript-sdk';
+import {
+  UserClient,
+  TESTNET_CONFIG,
+  createCustomStarkSigner,
+} from 'extended-typescript-sdk';
 
 // Create user client
 const userClient = new UserClient(TESTNET_CONFIG, () => ethPrivateKey);
@@ -346,6 +356,11 @@ const starkAccount = new StarkPerpetualAccount(
   account.l2KeyPair.publicHex,
   apiKey
 );
+
+starkAccount.setCustomSigner(createCustomStarkSigner(async (msgHash) => {
+  const signature = await remoteSigner.sign('0x' + msgHash.toString(16));
+  return { r: signature.r, s: signature.s };
+}));
 
 const client = new PerpetualTradingClient(TESTNET_CONFIG, starkAccount);
 ```
@@ -495,24 +510,43 @@ export default {
 };
 ```
 
-> 📖 **For detailed bundler configurations and troubleshooting**, see [BUNDLER_CONFIG.md](./BUNDLER_CONFIG.md)
+> 📖 **For environment-specific setup and bundler notes**, see [ENVIRONMENT_SUPPORT.md](./ENVIRONMENT_SUPPORT.md) and [vite.config.example.ts](./vite.config.example.ts)
 
-## WASM Signer
+## WASM Crypto Utilities
 
-The SDK includes a pre-built WASM signer that works in both **Node.js** and **browser** environments. **No Rust installation is required to use the SDK.**
+The SDK still ships pre-built WASM utilities for hashing, key derivation, and onboarding flows. Trading signatures are no longer performed through the built-in WASM signer.
 
-### Using the Pre-built Signer
-
-The SDK ships with pre-built WASM files. Simply use the SDK:
+### Using WASM Utilities
 
 ```typescript
-import { initWasm, sign } from 'extended-typescript-sdk';
+import {
+  initWasm,
+  generateKeypairFromEthSignature,
+  getOrderMsgHash,
+} from 'extended-typescript-sdk';
 
-await initWasm(); // Automatically loads the correct WASM for your environment
-const [r, s] = sign(privateKey, msgHash);
+await initWasm();
+
+const [privateKey, publicKey] = generateKeypairFromEthSignature(ethSignature);
+const orderHash = getOrderMsgHash({
+  positionId,
+  baseAssetId,
+  baseAmount,
+  quoteAssetId,
+  quoteAmount,
+  feeAmount,
+  feeAssetId,
+  expiration,
+  salt,
+  userPublicKey,
+  domainName,
+  domainVersion,
+  domainChainId,
+  domainRevision,
+});
 ```
 
-The signer automatically detects your environment (Node.js or browser) and loads the appropriate WASM module.
+Use a custom signer for live order placement, transfer signing, and withdrawal signing.
 
 ### Custom Signer Support (Privy, Web3Auth, etc.)
 
@@ -520,7 +554,8 @@ The SDK supports **custom signers** for integration with remote signing services
 
 ```typescript
 import { 
-  CustomStarkSigner, 
+  CustomStarkSigner,
+  createCustomStarkSigner,
   createStarkPerpetualAccountWithCustomSigner 
 } from 'extended-typescript-sdk';
 
@@ -551,11 +586,66 @@ const account = createStarkPerpetualAccountWithCustomSigner(
 const client = new PerpetualTradingClient(TESTNET_CONFIG, account);
 ```
 
+If your signing provider already exposes a function, you do not need to write a class. You can wrap it directly:
+
+```typescript
+import {
+  createCustomStarkSigner,
+  createStarkPerpetualAccountWithCustomSigner,
+} from 'extended-typescript-sdk';
+
+const signer = createCustomStarkSigner(async (msgHash) => {
+  const signature = await remoteSigner.sign(msgHash);
+
+  // Supports [r, s] tuples or { r, s } objects.
+  // Each component can be bigint, decimal string, or 0x-prefixed hex string.
+  return {
+    r: signature.r,
+    s: signature.s,
+  };
+});
+
+const account = createStarkPerpetualAccountWithCustomSigner(
+  vaultId,
+  publicKeyHex,
+  apiKey,
+  signer
+);
+```
+
+This is the supported integration path for live trading signatures.
+
+### Official Wrapper Adapter
+
+If you are using the official x10 Stark wrapper directly, use the adapter below. The wrapper is not published on npm at the moment, so install it from the upstream source you trust and pass the module instance into the SDK:
+
+```typescript
+import {
+  createOfficialWrapperStarkSigner,
+  createStarkPerpetualAccountWithCustomSigner,
+} from 'extended-typescript-sdk';
+import * as officialWrapper from 'your-official-wrapper-module';
+
+const signer = createOfficialWrapperStarkSigner(
+  officialWrapper,
+  privateKeyHex
+);
+
+const account = createStarkPerpetualAccountWithCustomSigner(
+  vaultId,
+  publicKeyHex,
+  apiKey,
+  signer
+);
+```
+
+This is the best stable path when you already have a canonical `sign_message(privateKeyHex, messageHex)` implementation.
+
 See [examples/16_privy_integration.ts](./examples/16_privy_integration.ts) for a complete example.
 
-### Building Your Own WASM Signer
+### Building WASM Utilities
 
-If you want to build your own WASM signer (requires Rust and wasm-pack):
+If you want to rebuild the bundled WASM utilities (requires Rust and wasm-pack):
 
 ```bash
 npm run build:signer:custom
@@ -565,11 +655,11 @@ npm run build:signer:custom
 1. Install Rust: https://www.rust-lang.org/tools/install
 2. Install wasm-pack: `cargo install wasm-pack`
 
-This will build both Node.js and browser targets and replace the shipped WASM signer.
+This will build both Node.js and browser targets and replace the shipped WASM utilities.
 
 ### Implementation
 
-The WASM signer uses `starknet-crypto` crate for cryptographic operations. It's production-ready and tested for compatibility with Extended Exchange API.
+The WASM bundle is retained for hashing and onboarding helpers. Stable live trading signatures should be delegated through the custom signer API.
 
 ## API Documentation
 
@@ -809,18 +899,13 @@ For issues and questions:
 
 Details and setup notes: see [ENVIRONMENT_SUPPORT.md](ENVIRONMENT_SUPPORT.md).
 
-## API Coverage
+## Standalone Crypto Functions
 
-See [API_COVERAGE.md](./API_COVERAGE.md) for complete API endpoint coverage analysis.
-
-## Standalone Signer Functions
-
-The cryptographic signer functions are exported from the main SDK package for standalone use:
+The standalone cryptographic utilities exported from the main SDK package are intended for hashing, onboarding, and key derivation:
 
 ```typescript
 import { 
   initWasm, 
-  sign, 
   pedersenHash,
   getOrderMsgHash,
   getTransferMsgHash,
@@ -830,11 +915,6 @@ import {
 
 // Initialize WASM module (required first!)
 await initWasm();
-
-// Sign a message hash
-const privateKey = BigInt('0x...');
-const msgHash = BigInt('0x...');
-const [r, s] = sign(privateKey, msgHash);
 
 // Compute Pedersen hash
 const hash = pedersenHash(BigInt('0x123'), BigInt('0x456'));
@@ -851,4 +931,6 @@ const orderHash = getOrderMsgHash({
 const [privateKey, publicKey] = generateKeypairFromEthSignature(ethSignature);
 ```
 
-All signer functions are documented with JSDoc comments. See the [signer source code](./src/perpetual/crypto/signer.ts) for detailed documentation.
+Use `createCustomStarkSigner()` or `createOfficialWrapperStarkSigner()` for live order, transfer, and withdrawal signatures.
+
+The utility functions are documented with JSDoc comments. See the [signer source code](./src/perpetual/crypto/signer.ts) for implementation details.

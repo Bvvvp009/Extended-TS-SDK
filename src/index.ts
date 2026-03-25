@@ -28,8 +28,19 @@ export {
 export { 
   CustomStarkSigner, 
   SignatureResult, 
+  SignatureResultLike,
+  SignatureComponent,
+  CustomSignerCallback,
+  CallbackStarkSigner,
+  createCustomStarkSigner,
+  normalizeSignatureResult,
   isCustomStarkSigner 
 } from './perpetual/custom-signer.js';
+
+export {
+  OfficialStarkWrapperModule,
+  createOfficialWrapperStarkSigner,
+} from './perpetual/official-wrapper-signer.js';
 
 // Orders
 export {
@@ -98,7 +109,6 @@ export * from './utils/env.js';
 
 // Cryptographic Signer Functions (exported for standalone use)
 export {
-  sign,
   pedersenHash,
   generateKeypairFromEthSignature,
   getOrderMsgHash,
